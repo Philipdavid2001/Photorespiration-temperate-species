@@ -44,9 +44,7 @@ dflist    <-   split(df,list(df$pairid))
 dflist    <-   split(df,unique(list(df$pairid)))
 dflist    <-   dflist[sapply(dflist, nrow)>0] 
 
-setwd("C:/Data/Masterdata/Excel/output")
-
-#setwd("~/GoogleDriveRT/Uppsala-2023/Philip-photorespiration/Uppsala-2024-June-Campaign/output/")
+setwd("output")
 
 outs = NULL
 
@@ -174,14 +172,25 @@ for(i in 1:length(dflist)) {
 
 write.table(outs, file = "Uppsala-PR-spot-2024-output.csv", 
             row.names = FALSE, col.names = T, sep = ",")
-outs <- read.csv("Uppsala-PR-spot-2024-output.csv", stringsAsFactors = T)
+outs <- read.csv("Species-output.csv", stringsAsFactors = T)
 
-outs <- read.csv("Uppsala-PR-spot-2024-output.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("Species-output.csv", stringsAsFactors = T, sep = ";")
 
 
 
 outs$se
 
+# Original pr ggplot script
+
+ggplot(outs, aes(x = setTleaf, y = pr)) +
+  theme_bw() +
+  xlab(lab_Tleaf) +
+  ylab("PR") +
+  geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) +
+  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
+  geom_smooth(method = "lm", se = F)
+
+#--------------------------------------------------------------#
 svg(filename = "anet21p.svg", width = 7, height = 4, bg = "transparent")
 ggplot(outs, aes(x = setTleaf, y = anet.21p)) +
     theme_bw() +
@@ -248,15 +257,6 @@ ggplot(outs, aes(x = setTleaf, y = NPQ.0p)) +
 dev.off()
 
 
-ggplot(outs, aes(x = setTleaf, y = Ca.prop)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("Ca.prop") +
-  geom_point() + facet_wrap(~sp) + ylim(-0.008,0.005) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-
-
 
 ## photorespiration proportion ----- 
 anova(aov(pr.proxy ~  sp * setTleaf, data = outs))
@@ -266,137 +266,6 @@ anova(aov(pr.proxy ~  setTleaf, data = outs))
 m1 <- nlme::lme(pr.proxy ~  sp * setTleaf, data = outs, random = ~1|treeid)
 anova(aov(pr.proxy ~  sp * setTleaf, data = outs))
 
-## etr proportion ----- 
-
-ggplot(outs, aes(x = setTleaf, y = E.delta)) +
-    theme_bw() +
-    xlab(lab_Tleaf) +
-    ylab("PR") +
-    geom_boxplot(outlier.shape = NA) + facet_wrap(~sp) + ylim(0,1) + xlim(20,40)  
 
 
-## etr proportion ----- 
-
-outs2 <- read.csv("Uppsala-PR-spot-2024-output.csv", stringsAsFactors = T)
-
-
-length(unique(outs2$sp))       # individual runs + season
-
-dflist    <-   split(outs2,list(outs2$sp))
-dflist    <-   split(outs2,unique(list(outs2$sp)))
-dflist    <-   dflist[sapply(dflist, nrow)>0] 
-
-cat <- NULL
-
-for(i in 1:length(dflist)) {
-  tempdf          <-          (dflist[[i]])
-  sp              <-          tempdf$sp[1]; sp
-  mod <- lm(pr.proxy ~ setTleaf, tempdf)
-  modsum <- summary(mod)
-  
-  
-  int        <- modsum$coefficients[1,1]; int
-  int.er     <- modsum$coefficients[1,2]; int.er  
-  int.tval   <- modsum$coefficients[1,3]; int.tval 
-  int.pval   <- modsum$coefficients[1,4]; int.pval 
-   
-  slope      <- modsum$coefficients[2,1]; slope
-  slope.er   <- modsum$coefficients[2,2]; slope.er  
-  slope.tval <- modsum$coefficients[2,3]; slope.tval 
-  slope.pval <- modsum$coefficients[2,4]; slope.pval 
-  
-  adj.r2     <- modsum$adj.r.squared; adj.r2
-  
-  params <- rbind(c(as.character(sp),
-                    int,       
-                    int.er,    
-                    int.tval,  
-                    int.pval,  
-                    slope,     
-                    slope.er,  
-                    slope.tval,
-                    slope.pval,
-                    adj.r2))
-  
-  colnames(params) <- c("sp","int",       
-                        "int.er",    
-                        "int.tval",  
-                        "int.pval",  
-                        "slope",     
-                        "slope.er",  
-                        "slope.tval",
-                        "slope.pval",
-                        "adj.r2")
-  cat = rbind(cat, params)
-  print(i)
-  
-}
-
-cat <- as.data.frame(cat)
-
-# outs <- subset(outs, sp != "scaint")
-
-ggplot(outs, aes(x = tleaf, y = pr, col = sp) ) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() + geom_smooth(method = "lm", se = F) + 
-  geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + facet_wrap(~sp) 
-  
-ggplot(outs, aes(x = tleaf, y = pr, col = sp) ) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() +  
-  geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2)
-
-
-svg(filename = "p1g.svg", width = 5, height = 4, bg = "transparent")
-ggplot(outs, aes(x = tleaf, y = pr, col = sp) ) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() +  
-  geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2)
-dev.off()  
-
-
-svg(filename = "p2g.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = tleaf, y = pr, col = sp) ) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() +  
-  geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2)+ facet_wrap(~sp) 
-dev.off()  
-
-
-svg(filename = "p3g.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = tleaf, y = pr, col = sp) ) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() + geom_smooth(method = "lm", se = T) + 
-  geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + facet_wrap(~sp) 
-dev.off() 
-
-svg(filename = "p4g.svg", width = 5, height = 4, bg = "transparent")
-ggplot(outs, aes(x = tleaf, y = pr, col = sp) ) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() +  
-  geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) +  
-  geom_smooth(method = "lm", se = F)
-dev.off() 
-
-
-svg(filename = "p5g.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = tleaf, y = pr, col = sp) ) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() + geom_smooth(method = "lm", se = F) + 
-  geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + facet_wrap(~sp) 
-dev.off() 
 
