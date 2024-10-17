@@ -1,5 +1,3 @@
-# What the heck does all this mean, Philip????
-
 #install.packages("Hmisc", dependencies = T)
 
 packages_to_load <- c("drc", "bbmle", "labelled", "MALDIquant", 
@@ -28,8 +26,7 @@ labgs           <- expression(paste(italic(g[s])*" ("~mol[H[2]*O]~m^{-2}~s^{-1}~
 
 ## data processing ----
 
-setwd("C:/Data/Masterdata/")
-df <- read.csv("Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
+df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
 
