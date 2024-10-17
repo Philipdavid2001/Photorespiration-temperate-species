@@ -82,6 +82,7 @@ for(i in 1:length(dflist)) {
     ETR.delta      <-          (ETR.0p - ETR.21p)
     ETR.percent    <-          ETR.delta/ETR.21p
     
+  
     Ca.21p          <-          p21$Ca
     Ci.21p          <-          p21$Ci
     Ca.0p           <-          p0$Ca 
@@ -170,7 +171,7 @@ for(i in 1:length(dflist)) {
 
 
 
-write.table(outs, file = "Uppsala-PR-spot-2024-output.csv", 
+write.table(outs, file = "Species-output.csv", 
             row.names = FALSE, col.names = T, sep = ",")
 outs <- read.csv("Species-output.csv", stringsAsFactors = T)
 
@@ -182,7 +183,7 @@ outs$se
 
 # Original pr ggplot script
 
-ggplot(outs, aes(x = setTleaf, y = pr)) +
+ggplot(outs, aes(x = setTleaf, y = pr.proxy)) +
   theme_bw() +
   xlab(lab_Tleaf) +
   ylab("PR") +
