@@ -26,6 +26,7 @@ labgs           <- expression(paste(italic(g[s])*" ("~mol[H[2]*O]~m^{-2}~s^{-1}~
 
 ## data processing ----
 
+
 df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
@@ -46,136 +47,143 @@ dflist    <-   dflist[sapply(dflist, nrow)>0]
 
 setwd("output")
 
-outs = NULL
 
-
-for(i in 1:length(dflist)) {
-    tempdf          <-          (dflist[[i]])
-    dlength         <-          nrow(tempdf)
-    if( dlength != 2 ) { 
-        next 
-        }
-    sp              <-          tempdf$sp[1]; sp
-    treeid          <-          tempdf$treeid[1]; treeid
-    setTleaf        <-          tempdf$setTleaf[1]; setTleaf
-    p21             <-          subset(tempdf, olev == "21p")    
-    p0              <-          subset(tempdf, olev != "21p")
-
-    anet.21p        <-          p21$A
-    anet.0p         <-          p0$A
-    anet.delta      <-          (anet.0p - anet.21p)
-    pr.proxy        <-          anet.delta/anet.21p
-    
-    gsw.21p        <-          p21$gsw
-    gsw.0p         <-          p0$gsw
-    gsw.delta      <-          (gsw.0p - gsw.21p)
-    gsw.percent    <-          gsw.delta/gsw.21p
-
-    
-    E.21p          <-          p21$E
-    E.0p           <-          p0$E
-    E.delta        <-          (E.0p - E.21p)
-    E.percent      <-          E.delta/E.21p
-    
-    ETR.21p        <-          p21$ETR
-    ETR.0p         <-          p0$ETR
-    ETR.delta      <-          (ETR.0p - ETR.21p)
-    ETR.percent    <-          ETR.delta/ETR.21p
-    
+correct_RD <- function(data, output_path){
   
-    Ca.21p          <-          p21$Ca
-    Ci.21p          <-          p21$Ci
-    Ca.0p           <-          p0$Ca 
-    Ci.0p           <-          p21$Ci
-    C.21p           <-          Ca.21p - Ci.21p
-    C.0p            <-          Ca.0p - Ci.0p
-    Ca.delta        <-          (Ca.0p - Ca.21p) 
-    Ci.delta        <-          (Ci.0p - Ci.21p)
-    C.delta         <-          (C.0p - C.21p)
-    Ca.prop         <-          Ca.delta/Ca.21p
-    Ci.prop         <-          Ci.delta/Ci.21p
-    C.prop          <-          C.delta/C.21p
+  ColumnNames <- c("sp","treeid","setTleaf",
+             "anet.21p",    
+             "anet.0p",
+             "Rd",
+             "corranet",
+             "anet.delta",  
+             "pr.real",    
+             "gsw.21p",    
+             "gsw.0p",     
+             "gsw.delta",  
+             "gsw.percent",
+             "E.21p",     
+             "E.0p",      
+             "E.delta",   
+             "E.percent", 
+             "ETR.21p",     
+             "ETR.0p",      
+             "ETR.delta",   
+             "ETR.percent",
+             "NPQ.21p",
+             "NPQ.0p",
+             "NPQ.delta",
+             "NPQ.percent")
+  
+  output_data <- data.frame(matrix(nrow = 0, ncol = length(ColumnNames)))
+  names(output_data) <- ColumnNames
+
+  for(dataIdx in 1:length(data)){
     
-    NPQ.21p         <-          p21$NPQ
-    NPQ.0p          <-          p0$NPQ
+    speciesdata <- data[[dataIdx]]
+    if(nrow(speciesdata) != 2){
+      print(names(dflist)[dataIdx])
+      print(nrow(speciesdata))
+      next
+    }
     
-    params <-  rbind(c(as.character(sp),
-                       as.character(treeid),
-                       as.character(setTleaf), 
-                       anet.21p,    
-                       anet.0p,     
-                       anet.delta,  
-                       pr.proxy,    
-                       gsw.21p,    
-                       gsw.0p,     
-                       gsw.delta,  
-                       gsw.percent,
-                       E.21p,     
-                       E.0p,      
-                       E.delta,   
-                       E.percent, 
-                       ETR.21p,     
-                       ETR.0p,      
-                       ETR.delta,   
-                       ETR.percent,
-                       Ca.21p,
-                       Ci.21p,
-                       C.21p,
-                       Ca.0p,
-                       Ci.0p,
-                       C.0p,
-                       Ca.delta,
-                       Ci.delta,
-                       C.delta,
-                       Ca.prop,
-                       Ci.prop,
-                       C.prop,
-                       NPQ.21p,
-                       NPQ.0p))
     
-    colnames(params) <- c("sp","treeid","setTleaf", 
-                       "anet.21p",    
-                       "anet.0p",     
-                       "anet.delta",  
-                       "pr.proxy",    
-                       "gsw.21p",    
-                       "gsw.0p",     
-                       "gsw.delta",  
-                       "gsw.percent",
-                       "E.21p",     
-                       "E.0p",      
-                       "E.delta",   
-                       "E.percent", 
-                       "ETR.21p",     
-                       "ETR.0p",      
-                       "ETR.delta",   
-                       "ETR.percent",
-                       "Ca.21p",
-                       "Ci.21p",
-                       "C.21p",
-                       "Ca.0p",
-                       "Ci.0p",
-                       "C.0p",
-                       "Ca.delta",
-                       "Ci.delta",
-                       "C.delta",
-                       "Ca.prop",
-                       "Ci.prop",
-                       "C.prop",
-                       "NPQ.21p",
-                       "NPQ.0p")
-    outs = rbind(outs, params)
-    print(i)
+    sp               <-     speciesdata$sp[1]
+    treeid           <-     speciesdata$treeid[1]
+    setTleaf         <-     speciesdata$setTleaf[1]
     
+    p21              <-     subset(speciesdata, olev == "21p")    
+    p0               <-     subset(speciesdata, olev == "0p")
+    
+    anet.21p         <-     p21$A
+    anet.0p          <-     p0$A
+     
+    
+    # Calculate corrected a net. The values for slope and intercept where           calculated using values taken from the literature.  
+    Rd <- 0.05554*anet.21p+ 0.11395 
+    corranet <- anet.21p-Rd
+    anet.delta <- anet.0p - corranet
+    
+    #TODO correct for photorespiration C02 release.
+    pr.real <- anet.delta/corranet
+    
+    gsw.21p          <-      p21$gsw
+    gsw.0p           <-      p0$gsw
+    gsw.delta        <-      p0$gsw - p21$gsw
+    gsw.percent      <-      gsw.delta/p21$gsw
+    
+    
+    E.21p            <-      p21$E
+    E.0p             <-      p0$E
+    E.delta          <-      p0$E - p21$E
+    E.percent        <-      E.delta/p21$E
+    
+    
+    ETR.21p          <-      p21$ETR
+    ETR.0p           <-      p0$ETR
+    ETR.delta        <-      p0$ETR - p21$ETR
+    ETR.percent      <-      ETR.delta/p21$ETR
+    
+    NPQ.21p          <-      p21$NPQ
+    NPQ.0p           <-      p0$NPQ
+    NPQ.delta        <-      NPQ.0p - NPQ.21p
+    NPQ.percent      <-      NPQ.delta/NPQ.21p
+    
+    new_data = data.frame(as.character(sp),
+                          as.character(treeid),
+                          as.character(setTleaf), 
+                          anet.21p,    
+                          anet.0p,     
+                          Rd, 
+                          corranet,
+                          anet.delta,  
+                          pr.real,    
+                          gsw.21p,    
+                          gsw.0p,     
+                          gsw.delta,  
+                          gsw.percent,
+                          p21$E,     
+                          E.0p,      
+                          E.delta,   
+                          E.percent, 
+                          ETR.21p,     
+                          ETR.0p,      
+                          ETR.delta,   
+                          ETR.percent,
+                          NPQ.21p,
+                          NPQ.0p,
+                          NPQ.delta, 
+                          NPQ.percent)
+    
+    names(new_data) <- names(output_data)
+    output_data <- rbind(output_data, new_data)
+    
+    
+  }
+  
+  file_path = paste(output_path, "species-output.csv", sep = "/")
+  if(!dir.exists(output_path)){
+    dir.create(output_path, recursive = T)
+  }
+  
+  
+  index <- 1
+  while(file.exists(file_path)){
+    file_path <- paste(output_path, paste("species-output", as.character(index), ".csv", sep =""), sep = "/")
+    index = index + 1
+  }
+ 
+  
+
+  write.table(output_data, file = file_path, 
+              row.names = FALSE, col.names = T, sep = ";")
 }
 
+correct_RD(dflist, "./")
 
 
-write.table(outs, file = "Species-output.csv", 
-            row.names = FALSE, col.names = T, sep = ",")
-outs <- read.csv("Species-output.csv", stringsAsFactors = T)
 
-outs <- read.csv("Species-output.csv", stringsAsFactors = T, sep = ";")
+
+outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
 
 
@@ -183,7 +191,7 @@ outs$se
 
 # Original pr ggplot script
 
-ggplot(outs, aes(x = setTleaf, y = pr.proxy)) +
+ggplot(outs, aes(x = setTleaf, y = pr.real)) +
   theme_bw() +
   xlab(lab_Tleaf) +
   ylab("PR") +
@@ -192,8 +200,8 @@ ggplot(outs, aes(x = setTleaf, y = pr.proxy)) +
   geom_smooth(method = "lm", se = F)
 
 #--------------------------------------------------------------#
-svg(filename = "anet21p.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = setTleaf, y = anet.21p)) +
+svg(filename = "Figures/anet21p.svg", width = 7, height = 4, bg = "transparent")
+ggplot(outs, aes(x = setTleaf, y = corranet)) +
     theme_bw() +
     xlab(lab_Tleaf) +
     ylab("Anet") +
@@ -203,7 +211,7 @@ ggplot(outs, aes(x = setTleaf, y = anet.21p)) +
 dev.off()
 
 
-svg(filename = "anet0p.svg", width = 7, height = 4, bg = "transparent")
+svg(filename = "Figures/anet0p.svg", width = 7, height = 4, bg = "transparent")
 ggplot(outs, aes(x = setTleaf, y = anet.0p)) +
   theme_bw() +
   xlab(lab_Tleaf) +
@@ -215,7 +223,7 @@ dev.off()
 
 
 
-svg(filename = "ETR21p.svg", width = 7, height = 4, bg = "transparent")
+svg(filename = "Figures/ETR21p.svg", width = 7, height = 4, bg = "transparent")
 ggplot(outs, aes(x = setTleaf, y = ETR.21p)) +
   theme_bw() +
   xlab(lab_Tleaf) +
@@ -226,7 +234,7 @@ ggplot(outs, aes(x = setTleaf, y = ETR.21p)) +
 dev.off()
 
 
-svg(filename = "ETR0p.svg", width = 7, height = 4, bg = "transparent")
+svg(filename = "Figures/ETR0p.svg", width = 7, height = 4, bg = "transparent")
 ggplot(outs, aes(x = setTleaf, y = ETR.0p)) +
   theme_bw() +
   xlab(lab_Tleaf) +
@@ -237,7 +245,7 @@ ggplot(outs, aes(x = setTleaf, y = ETR.0p)) +
 dev.off()
 
 
-svg(filename = "NPQ21p.svg", width = 7, height = 4, bg = "transparent")
+svg(filename = "Figures/NPQ21p.svg", width = 7, height = 4, bg = "transparent")
 ggplot(outs, aes(x = setTleaf, y = NPQ.21p)) +
   theme_bw() +
   xlab(lab_Tleaf) +
@@ -247,7 +255,7 @@ ggplot(outs, aes(x = setTleaf, y = NPQ.21p)) +
   geom_smooth(method = "lm", se = F)
 dev.off()
 
-svg(filename = "NPQ0p.svg", width = 7, height = 4, bg = "transparent")
+svg(filename = "Figures/NPQ0p.svg", width = 7, height = 4, bg = "transparent")
 ggplot(outs, aes(x = setTleaf, y = NPQ.0p)) +
   theme_bw() +
   xlab(lab_Tleaf) +
@@ -260,13 +268,12 @@ dev.off()
 
 
 ## photorespiration proportion ----- 
-anova(aov(pr.proxy ~  sp * setTleaf, data = outs))
-anova(aov(pr.proxy ~  sp, data = outs))
-anova(aov(pr.proxy ~  setTleaf, data = outs))
+anova(aov(pr.real ~  sp, data = outs))
+anova(aov(pr.real ~  setTleaf, data = outs))
+anova(aov(pr.real ~  sp * setTleaf, data = outs))
 
-m1 <- nlme::lme(pr.proxy ~  sp * setTleaf, data = outs, random = ~1|treeid)
-anova(aov(pr.proxy ~  sp * setTleaf, data = outs))
+m1 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, random = ~1|treeid)
+anova(aov(pr.real ~  sp * setTleaf, data = outs))
 
-
-
+m1
 
