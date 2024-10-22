@@ -24,11 +24,19 @@ photorate       <- expression("" ~mu ~ mol ~ "CO"[2]~m^{-2} ~ "s"^{-1})
 labgs           <- expression(paste(italic(g[s])*" ("~mol[H[2]*O]~m^{-2}~s^{-1}~")"))
 
 
-## data processing ----
+## data processing ---- Load ONE of the following csv's
 
 
+# Species
 df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
 
+
+# Ecotypes
+
+df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-Birch-Ecotypes.csv", header = T, stringsAsFactors = T, sep = ";")
+
+
+#-----------------------------------------------------#
 
 
 ## use the following filters as necessary
@@ -98,12 +106,14 @@ correct_RD <- function(data, output_path){
     anet.0p          <-     p0$A
      
     
-    # Calculate corrected a net. The values for slope and intercept where           calculated using values taken from the literature.  
+    # Calculate corrected Anet. The values for slope and intercept where           calculated using values taken from the literature.  
     Rd <- 0.05554*anet.21p+ 0.11395 
-    corranet <- anet.21p-Rd
+    corranet <- anet.21p-Rd          # "corranet" is Anet corrected for Rd
     anet.delta <- anet.0p - corranet
     
-    #TODO correct for photorespiration C02 release.
+    #####TODO correct for photorespiration C02 release######
+    
+    
     pr.real <- anet.delta/corranet
     
     gsw.21p          <-      p21$gsw
@@ -185,9 +195,52 @@ correct_RD(dflist, "./")
 
 outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
+library(dplyr)
+s.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(pr.real.avg = mean(pr.real),
+            se = sd(pr.real))
+
+library(ggpubr)
+library(ggpmisc)
+
+ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
+  geom_point(col="black", size = 1.5)+
+  geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=pr.real, x=setTleaf), se = F, method="lm")+
+  stat_poly_eq(
+    data = outs,
+    formula = y ~ x,
+    aes(x = setTleaf, y = pr.real, label = paste(after_stat(eq.label),
+                                                 after_stat(rr.label),
+                                                 after_stat(p.value.label), sep = "~~~")),
+    label.x = 22,
+    label.y = 1.5,
+    digits = 2
+  )+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp)+
+  scale_y_continuous(limits = c(0, 1.8), name = "Photorespiration Rate")+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
+  theme_minimal()
+
+# Calculating mean, std and se
+
+# Mean
+meanpr  <- (pr.real$setTleaf)/(nrow(treeid))
 
 
-outs$se
+# Std
+
+
+Std.pr  <- sd(pr.real)
+
+# Se
+
+
+
 
 # Original pr ggplot script
 
@@ -196,6 +249,17 @@ ggplot(outs, aes(x = setTleaf, y = pr.real)) +
   xlab(lab_Tleaf) +
   ylab("PR") +
   geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) +
+  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
+  #geom_smooth(method = "lm", se = F)
+
+
+
+# tweaked 
+ggplot(outs, aes(x = setTleaf, y = pr.real)) +
+  theme_bw() +
+  xlab(lab_Tleaf) +
+  ylab("PR") +
+  geom_boxplot(mapping = aes(group = setTleaf)) + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) +
   #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
   geom_smooth(method = "lm", se = F)
 
@@ -268,12 +332,22 @@ dev.off()
 
 
 ## photorespiration proportion ----- 
+
 anova(aov(pr.real ~  sp, data = outs))
-anova(aov(pr.real ~  setTleaf, data = outs))
+anova(aov(corranet ~  sp, data = outs))
+anova(aov(pr.real ~  corranet, data = outs))
+anova(aov(pr.real ~  setTleaf+sp, data = outs))
+anova(aov(corranet ~  setTleaf, data = outs))
 anova(aov(pr.real ~  sp * setTleaf, data = outs))
+anova(aov(corranet ~  sp * setTleaf, data = outs))
 
 m1 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, random = ~1|treeid)
 anova(aov(pr.real ~  sp * setTleaf, data = outs))
 
 m1
+
+# Things I wanna test
+
+
+# Is higher Anet correlated with higher PR? 
 
