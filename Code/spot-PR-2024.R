@@ -226,19 +226,6 @@ ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
   theme_minimal()
 
-# Calculating mean, std and se
-
-# Mean
-meanpr  <- (pr.real$setTleaf)/(nrow(treeid))
-
-
-# Std
-
-
-Std.pr  <- sd(pr.real)
-
-# Se
-
 
 
 
