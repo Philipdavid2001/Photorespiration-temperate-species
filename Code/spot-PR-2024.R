@@ -1,7 +1,7 @@
 #install.packages("Hmisc", dependencies = T)
 
 packages_to_load <- c("drc", "bbmle", "labelled", "MALDIquant", 
-                      "magicfor", "ggplot2", "tidyverse", "broom", 
+                      "magicfor", "ggplot2", "ggpubr", "ggpmisc", "tidyverse", "broom", 
                       "Hmisc", "plotly", "PairedData", "DescTools", 
                       "generalhoslem", "graphics", "nls2", "plyr",
                       "ggthemes", "ggpubr", "signal", "segmented")
@@ -195,14 +195,14 @@ correct_RD(dflist, "./")
 
 outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
+
+# Making the table for the concatenated PR values for each species and each temperature point.
+
 library(dplyr)
 s.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.real.avg = mean(pr.real),
             se = sd(pr.real))
-
-library(ggpubr)
-library(ggpmisc)
 
 ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   geom_point(col="black", size = 1.5)+
@@ -238,7 +238,6 @@ ggplot(outs, aes(x = setTleaf, y = pr.real)) +
   geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) +
   #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
   #geom_smooth(method = "lm", se = F)
-
 
 
 # tweaked 
@@ -333,8 +332,13 @@ anova(aov(pr.real ~  sp * setTleaf, data = outs))
 
 m1
 
+
+
+
 # Things I wanna test
 
 
 # Is higher Anet correlated with higher PR? 
+# Is lower ETR correlated to higher PR?
+# 
 
