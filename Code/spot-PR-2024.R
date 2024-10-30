@@ -63,8 +63,10 @@ correct_RD <- function(data, output_path){
              "anet.0p",
              "Rd",
              "corranet",
-             "anet.delta",  
-             "pr.real",    
+             "anet.delta",
+             "pr.CO2", 
+             "pr.real",
+             "pr.percent",    
              "gsw.21p",    
              "gsw.0p",     
              "gsw.delta",  
@@ -74,9 +76,12 @@ correct_RD <- function(data, output_path){
              "E.delta",   
              "E.percent", 
              "ETR.21p",     
-             "ETR.0p",      
+             "ETR.0p",
              "ETR.delta",   
              "ETR.percent",
+             "JT",
+             "JO",
+             "JC",
              "NPQ.21p",
              "NPQ.0p",
              "NPQ.delta",
@@ -106,15 +111,17 @@ correct_RD <- function(data, output_path){
     anet.0p          <-     p0$A
      
     
-    # Calculate corrected Anet. The values for slope and intercept where           calculated using values taken from the literature.  
-    Rd <- 0.05554*anet.21p+ 0.11395 
-    corranet <- anet.21p-Rd          # "corranet" is Anet corrected for Rd
-    anet.delta <- anet.0p - corranet
+    # Calculate corrected Anet. The values for slope and intercept       where calculated using values taken from the literature. 
     
-    #####TODO correct for photorespiration C02 release######
+    Rd               <-      0.05554*anet.21p+ 0.11395 
+    corranet         <-      anet.21p-Rd          
+    # "corranet" is Anet corrected for Rd
     
     
-    pr.real <- anet.delta/corranet
+    anet.delta       <-      anet.0p - corranet
+    pr.CO2           <-      anet.delta * 0.5
+    pr.real          <-      anet.delta + pr.CO2
+    pr.percent       <-      pr.real/corranet
     
     gsw.21p          <-      p21$gsw
     gsw.0p           <-      p0$gsw
@@ -132,6 +139,9 @@ correct_RD <- function(data, output_path){
     ETR.0p           <-      p0$ETR
     ETR.delta        <-      p0$ETR - p21$ETR
     ETR.percent      <-      ETR.delta/p21$ETR
+    JT               <-      ETR.21p + ETR.0p
+    JO               <-      pr.percent * JT
+    JC               <-      JT-JO
     
     NPQ.21p          <-      p21$NPQ
     NPQ.0p           <-      p0$NPQ
@@ -145,8 +155,10 @@ correct_RD <- function(data, output_path){
                           anet.0p,     
                           Rd, 
                           corranet,
-                          anet.delta,  
-                          pr.real,    
+                          anet.delta,
+                          pr.CO2,
+                          pr.real,
+                          pr.percent,
                           gsw.21p,    
                           gsw.0p,     
                           gsw.delta,  
@@ -156,9 +168,12 @@ correct_RD <- function(data, output_path){
                           E.delta,   
                           E.percent, 
                           ETR.21p,     
-                          ETR.0p,      
+                          ETR.0p,   
                           ETR.delta,   
                           ETR.percent,
+                          JT,
+                          JO,
+                          JC,
                           NPQ.21p,
                           NPQ.0p,
                           NPQ.delta, 
@@ -191,8 +206,6 @@ correct_RD <- function(data, output_path){
 correct_RD(dflist, "./")
 
 
-
-
 outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
 
@@ -204,14 +217,14 @@ s.table <- outs %>%
   summarise(pr.real.avg = mean(pr.real),
             se = sd(pr.real))
 
-ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
+ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   geom_point(col="black", size = 1.5)+
   geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=pr.real, x=setTleaf), se = F, method="lm")+
+  geom_smooth(data = outs, mapping = aes(y=pr.percent, x=setTleaf), se = F, method="lm")+
   stat_poly_eq(
     data = outs,
     formula = y ~ x,
-    aes(x = setTleaf, y = pr.real, label = paste(after_stat(eq.label),
+    aes(x = setTleaf, y = pr.percent, label = paste(after_stat(eq.label),
                                                  after_stat(rr.label),
                                                  after_stat(p.value.label), sep = "~~~")),
     label.x = 22,
@@ -320,12 +333,9 @@ dev.off()
 ## photorespiration proportion ----- 
 
 anova(aov(pr.real ~  sp, data = outs))
-anova(aov(corranet ~  sp, data = outs))
 anova(aov(pr.real ~  corranet, data = outs))
-anova(aov(pr.real ~  setTleaf+sp, data = outs))
-anova(aov(corranet ~  setTleaf, data = outs))
+anova(aov(pr.real ~  setTleaf, data = outs))
 anova(aov(pr.real ~  sp * setTleaf, data = outs))
-anova(aov(corranet ~  sp * setTleaf, data = outs))
 
 m1 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, random = ~1|treeid)
 anova(aov(pr.real ~  sp * setTleaf, data = outs))
