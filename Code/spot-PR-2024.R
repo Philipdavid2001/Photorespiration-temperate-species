@@ -80,8 +80,14 @@ correct_RD <- function(data, output_path){
              "ETR.delta",   
              "ETR.percent",
              "JT",
-             "JO",
-             "JC",
+             "JO1",
+             "JC1",
+             "JO2",
+             "JC2",
+             "JO1.percent",
+             "JC1.percent",
+             "JO2.percent",
+             "JC2.percent",
              "NPQ.21p",
              "NPQ.0p",
              "NPQ.delta",
@@ -118,10 +124,10 @@ correct_RD <- function(data, output_path){
     # "corranet" is Anet corrected for Rd
     
     
-    anet.delta       <-      anet.0p - corranet
+    anet.delta       <-      anet.0p - anet.21p
     pr.CO2           <-      anet.delta * 0.5
     pr.real          <-      anet.delta + pr.CO2
-    pr.percent       <-      pr.real/corranet
+    pr.percent       <-      pr.real/anet.21p
     
     gsw.21p          <-      p21$gsw
     gsw.0p           <-      p0$gsw
@@ -140,8 +146,15 @@ correct_RD <- function(data, output_path){
     ETR.delta        <-      p0$ETR - p21$ETR
     ETR.percent      <-      ETR.delta/p21$ETR
     JT               <-      ETR.21p + ETR.0p
-    JO               <-      pr.percent * JT
-    JC               <-      JT-JO
+    JO1              <-      pr.percent * JT
+    JC1              <-      JT-JO1
+    JO2              <-      ((2/3)*(JT-4*(anet.21p)))
+    JC2              <-      ((1/3)*(JT+8*(anet.21p)))
+    JO1.percent      <-      JO1/JT
+    JC1.percent      <-      JC1/JT
+    JO2.percent      <-      JO2/JT
+    JC2.percent      <-      JC2/JT
+    
     
     NPQ.21p          <-      p21$NPQ
     NPQ.0p           <-      p0$NPQ
@@ -172,8 +185,14 @@ correct_RD <- function(data, output_path){
                           ETR.delta,   
                           ETR.percent,
                           JT,
-                          JO,
-                          JC,
+                          JO1,
+                          JC1,
+                          JO2,
+                          JC2,
+                          JO1.percent,
+                          JC1.percent,
+                          JO2.percent,
+                          JC2.percent,
                           NPQ.21p,
                           NPQ.0p,
                           NPQ.delta, 
@@ -206,7 +225,7 @@ correct_RD <- function(data, output_path){
 correct_RD(dflist, "./")
 
 
-outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("species-output4.csv", stringsAsFactors = T, sep = ";")
 
 
 # Making the table for the concatenated PR values for each species and each temperature point.
@@ -219,7 +238,7 @@ s.table <- outs %>%
 
 ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   geom_point(col="black", size = 1.5)+
-  geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
   geom_smooth(data = outs, mapping = aes(y=pr.percent, x=setTleaf), se = F, method="lm")+
   stat_poly_eq(
     data = outs,
@@ -244,17 +263,17 @@ ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
 
 # Original pr ggplot script
 
-ggplot(outs, aes(x = setTleaf, y = pr.real)) +
+ggplot(outs, aes(x = setTleaf, y = JO1.percent)) +
   theme_bw() +
   xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) +
+  ylab("JO2") +
+  geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(0,1) 
   #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
   #geom_smooth(method = "lm", se = F)
 
 
 # tweaked 
-ggplot(outs, aes(x = setTleaf, y = pr.real)) +
+ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
   theme_bw() +
   xlab(lab_Tleaf) +
   ylab("PR") +
@@ -341,6 +360,15 @@ m1 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, random = ~1|treeid)
 anova(aov(pr.real ~  sp * setTleaf, data = outs))
 
 m1
+
+
+
+anova(aov(JO2.percent ~  sp, data = outs))             # Very significant
+anova(aov(JO2.percent ~  setTleaf, data = outs))       #  Very significant
+anova(aov(pr.percent ~  sp, data = outs))              #  Very significant
+anova(aov(pr.percent ~  setTleaf, data = outs))        #  Very significant
+anova(aov(JO2.percent ~  sp * setTleaf, data = outs))  #  Not significant
+anova(aov(pr.percent ~  sp * setTleaf, data = outs))   #  Not significant
 
 
 
