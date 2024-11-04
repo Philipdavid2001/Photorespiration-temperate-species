@@ -225,7 +225,7 @@ correct_RD <- function(data, output_path){
 correct_RD(dflist, "./")
 
 
-outs <- read.csv("species-output4.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("species-output7.csv", stringsAsFactors = T, sep = ";")
 
 
 # Making the table for the concatenated PR values for each species and each temperature point.
@@ -235,6 +235,38 @@ s.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.real.avg = mean(pr.real),
             se = sd(pr.real))
+
+ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
+  geom_point(col="black", size = 1.5)+
+  geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=pr.real, x=setTleaf), se = F, method="lm")+
+  stat_poly_eq(
+    data = outs,
+    formula = y ~ x,
+    aes(x = setTleaf, y = pr.real, label = paste(after_stat(eq.label),
+                                                 after_stat(rr.label),
+                                                 after_stat(p.value.label), sep = "~~~")),
+    label.x = 22,
+    label.y = 1.5,
+    digits = 2
+  )+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp)+
+  scale_y_continuous(limits = c(0, 20), name = "Photorespiration Rate")+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
+  theme_minimal()
+
+
+
+###Plot of pr.percent
+
+library(dplyr)
+s.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(pr.percent.avg = mean(pr.percent),
+            se = sd(pr.percent))
 
 ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   geom_point(col="black", size = 1.5)+
@@ -254,20 +286,19 @@ ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp)+
-  scale_y_continuous(limits = c(0, 1.8), name = "Photorespiration Rate")+
+  scale_y_continuous(limits = c(0, 1.5), name = "Photorespiration Rate [%]")+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
   theme_minimal()
 
 
 
-
 # Original pr ggplot script
 
-ggplot(outs, aes(x = setTleaf, y = JO1.percent)) +
+ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
   theme_bw() +
   xlab(lab_Tleaf) +
-  ylab("JO2") +
-  geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(0,1) 
+  ylab("PR") +
+  geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) 
   #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
   #geom_smooth(method = "lm", se = F)
 
