@@ -1,4 +1,30 @@
-#install.packages("Hmisc", dependencies = T)
+---
+title: "Photorespiration-Species"
+author: "Philip"
+date: "2024-11-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Before using any of the code below, make sure that all of the necessary packages are installed using this line. If any packages are missing from the library, please do install them manually using the hashed out line below. 
+
+```{r}
+install.packages("Hmisc", dependencies = T) 
+
+# install.packages("missingpackage")
+```
+
+
+
+
+#Loading in all the packages and setting up so that all variables are expressed correctly
+
+
+```{r}
 
 packages_to_load <- c("drc", "bbmle", "labelled", "MALDIquant", 
                       "magicfor", "ggplot2", "ggpubr", "ggpmisc", "tidyverse", "broom", 
@@ -24,22 +50,21 @@ photorate       <- expression("" ~mu ~ mol ~ "CO"[2]~m^{-2} ~ "s"^{-1})
 labgs           <- expression(paste(italic(g[s])*" ("~mol[H[2]*O]~m^{-2}~s^{-1}~")"))
 
 
-## data processing ---- Load ONE of the following csv's
+
+```
 
 
-# Species
+#Loading in the compiled species data into a dataframe (df).
+
+```{r}
 df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
+```
 
 
-# Ecotypes
 
-df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-Birch-Ecotypes.csv", header = T, stringsAsFactors = T, sep = ";")
+#Cleaning up the dataframe by sorting out any entries in the loaded file that will not be used in the analysis. Thereafter pairing entries together (O2-free with ambient for the same replicate). Then converting all the pairs into factors.
 
-
-#-----------------------------------------------------#
-
-
-## use the following filters as necessary
+```{r}
 df     <- subset(df, dq == "yes") # eliminates unreliable values.
 
 df$pairid <- paste0(df$sprp, "-", df$setTleaf)
@@ -54,8 +79,13 @@ dflist    <-   split(df,unique(list(df$pairid)))
 dflist    <-   dflist[sapply(dflist, nrow)>0] 
 
 setwd("output")
+```
 
 
+
+#Next, running the for loop that will give us our worksheet for the statistical analysis. All variables that we want to calculate and use for later are set here. 
+
+```{r}
 correct_RD <- function(data, output_path){
   
   ColumnNames <- c("sp","treeid","setTleaf",
@@ -222,14 +252,25 @@ correct_RD <- function(data, output_path){
               row.names = FALSE, col.names = T, sep = ";")
 }
 
+
 correct_RD(dflist, "./")
 
+```
+
+
+
+#Loading in the output file of the for loop into the "outs" dataframe. 
+
+```{r}
 
 outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
+```
 
-# Making the table for the concatenated PR values for each species and each temperature point.
 
+# Thereafter, we can make some figures with our compiled data, for instance plotting the absolute rates of photorespiration over the leaf temperature for each species. 
+
+```{r}
 library(dplyr)
 s.table <- outs %>%
   group_by(sp, setTleaf) %>%
@@ -239,7 +280,7 @@ s.table <- outs %>%
 
 svg(filename = "pr-raw.svg", width = 16, height = 4.5, bg = "transparent")
 
-ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
+ggplot(s.table, aes(y = pr.real.avg, x = setTleaf, group=sp))+
   geom_point(col="black", size = 1.5)+
   geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
   geom_smooth(data = outs, mapping = aes(y=pr.real, x=setTleaf), se = F, method="lm")+
@@ -249,7 +290,7 @@ ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
     aes(x = setTleaf, y = pr.real, label = paste(after_stat(p.value.label), sep = "")),
     label.x = 20,
     label.y = 1.5,
-    digits = 1
+    digits = 2
   )+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
@@ -259,158 +300,11 @@ ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base()
 dev.off()
+```
 
+# Here we are running a for loop testing the relationship between species, setTleaf and the combined effect of them (I.e the temperature response of species), against pr.real (Absolute photorespiration rates ("10")), pr.percent (Proportional photorespiration rates ("11")), anet.21p (Ambient photosynthesis rates ("4")), anet.0p (O2-free photosynthesis rates ("5")) and JO2.percent (proportional oxygenation rates calculated using ETR only ("31)).
 
-###Plot of pr.percent
-
-library(dplyr)
-s.table <- outs %>%
-  group_by(sp, setTleaf) %>%
-  summarise(pr.percent.avg = mean(pr.percent),
-            se = sd(pr.percent))
-
-svg(filename = "pr-percent.svg", width = 16, height = 4.5, bg = "transparent")
-ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
-  geom_point(col="black", size = 1.5)+
-  geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=pr.percent, x=setTleaf), se = F, method="lm")+
-  stat_poly_eq(
-    data = outs,
-    formula = y ~ x,
-    aes(x = setTleaf, y = pr.percent, label = paste(after_stat(p.value.label), sep = "~~~")),
-    label.x = 22,
-    label.y = 1.5,
-    digits = 2
-  )+
-  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
-  # formula = y~x,
-  # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp, ncol = 7)+
-  scale_y_continuous(limits = c(0, 1.5), name = "Rp / Net CO2 assimilation rate (21 % O2) (%)")+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
-  theme_base()
-dev.off()
-
-
-### Plot showing JO2 and JC2
-
-library(dplyr)
-s.table <- outs %>%
-  group_by(sp, setTleaf) %>%
-  summarise(JO2.percent.avg = mean(JO2.percent),
-            se = sd(JO2.percent))
-
-svg(filename = "JO2.percent.svg", width = 7, height = 4, bg = "transparent")
-ggplot(s.table, aes(y = JO2.percent.avg, x=setTleaf, group=sp))+
-  geom_point(col="black", size = 1.5)+
-  geom_errorbar(aes(ymin=JO2.percent.avg-se, ymax=JO2.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(JO2.percent.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=JO2.percent, x=setTleaf), se = F, method="lm")+
-  stat_poly_eq(
-    data = outs,
-    formula = y ~ x,
-    aes(x = setTleaf, y = JO2.percent, label = paste(after_stat(eq.label),
-                                                 after_stat(rr.label),
-                                                 after_stat(p.value.label), sep = "~~~")),
-    label.x = 22,
-    label.y = 1.5,
-    digits = 2
-  )+
-  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
-  # formula = y~x,
-  # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp)+
-  scale_y_continuous(limits = c(0, 1), name = "Oxygenation proportion (ETR)")+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
-  theme_minimal()
-dev.off()
-
-
-
-
-library(dplyr)
-s.table <- outs %>%
-  group_by(sp, setTleaf) %>%
-  summarise(JC2.percent.avg = mean(JC2.percent),
-            se = sd(JC2.percent))
-
-svg(filename = "JC2.percent.svg", width = 7, height = 4, bg = "transparent")
-ggplot(s.table, aes(y = JC2.percent.avg, x=setTleaf, group=sp))+
-  geom_point(col="black", size = 1.5)+
-  geom_errorbar(aes(ymin=JC2.percent.avg-se, ymax=JC2.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(JC2.percent.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=JC2.percent, x=setTleaf), se = F, method="lm")+
-  stat_poly_eq(
-    data = outs,
-    formula = y ~ x,
-    aes(x = setTleaf, y = JC2.percent, label = paste(after_stat(eq.label),
-                                                     after_stat(rr.label),
-                                                     after_stat(p.value.label), sep = "~~~")),
-    label.x = 22,
-    label.y = 1.5,
-    digits = 2
-  )+
-  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
-  # formula = y~x,
-  # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp)+
-  scale_y_continuous(limits = c(0, 1), name = "Carboxylation proportion (ETR)")+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
-  theme_minimal()
-dev.off()
-
-
-
-
-# Original pr ggplot script
-
-ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) 
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  #geom_smooth(method = "lm", se = F)
-
-
-# tweaked 
-ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_boxplot(mapping = aes(group = setTleaf)) + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-
-
-
-## photorespiration proportion ----- 
-
-anova(aov(pr.real ~  sp, data = outs))
-anova(aov(pr.real ~  corranet, data = outs))
-anova(aov(pr.real ~  setTleaf, data = outs))
-anova(aov(pr.real ~  sp * setTleaf, data = outs))
-
-m1 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, random = ~1|treeid)
-anova(aov(pr.real ~  sp * setTleaf, data = outs))
-
-m1
-
-
-
-anova(aov(JO2.percent ~  sp, data = outs))             # Very significant
-anova(aov(JO2.percent ~  setTleaf, data = outs))       #  Very significant
-anova(aov(pr.percent ~  sp, data = outs))              #  Very significant
-anova(aov(pr.percent ~  setTleaf, data = outs))        #  Very significant
-anova(aov(JO2.percent ~  sp * setTleaf, data = outs))  #  Not significant
-anova(aov(pr.percent ~  sp * setTleaf, data = outs))   #  Not significant
-
-
-###### STATISTICAL TESTS #########
-
-
-## example model fits nlme ---- 
-
-# Here we are running a for loop testing     the relationship between species, setTleaf and the combined effect of them (I.e the temperature response of species), against pr.real (Absolute photorespiration rates ("10")), pr.percent (Proportional photorespiration rates ("11")), anet.21p (Ambient photosynthesis rates ("4")), anet.0p (O2-free photosynthesis rates ("5")) and JO2.percent (proportional oxygenation rates calculated using ETR only ("31)).
-
+```{r}
 
 colindeces <- c(10, 11, 4, 5, 31)
 method.slope <- c()
@@ -480,8 +374,13 @@ ggplot(long_data, aes(x = setTleaf, y = y, color = method)) +
   labs(title = "Comparison of Slopes for y1 and y2") +
   theme_minimal()
 
+```
 
-### post hoc test ------- HSD, honest significant difference 
+
+
+# Post hoc test ------- HSD, honest significant difference, I still need to figure out how 
+
+```{r}
 
 m7 <- aov(anet.0p ~ sp, data = outs, random = ~1|treeid, method = "REML", na.action=na.omit) ; anova(m7)
 par(las=2)
@@ -496,8 +395,13 @@ t1$com <- rownames(t1)
 rownames(t1) <- NULL
 colnames(t1) <- c("prdiff","lwr", "upr","padj", "com")
 blah <- subset(t1, padj <= 0.05)
+```
 
+```{r}
 
+```
 
+```{r}
 
+```
 
