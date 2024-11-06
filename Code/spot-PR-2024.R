@@ -225,7 +225,7 @@ correct_RD <- function(data, output_path){
 correct_RD(dflist, "./")
 
 
-outs <- read.csv("species-output7.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
 
 # Making the table for the concatenated PR values for each species and each temperature point.
@@ -236,29 +236,30 @@ s.table <- outs %>%
   summarise(pr.real.avg = mean(pr.real),
             se = sd(pr.real))
 
+
+svg(filename = "pr-raw.svg", width = 16, height = 4.5, bg = "transparent")
+
 ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   geom_point(col="black", size = 1.5)+
   geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
   geom_smooth(data = outs, mapping = aes(y=pr.real, x=setTleaf), se = F, method="lm")+
-  stat_poly_eq(
+  ggpmisc::stat_poly_eq(
     data = outs,
     formula = y ~ x,
-    aes(x = setTleaf, y = pr.real, label = paste(after_stat(eq.label),
-                                                 after_stat(rr.label),
-                                                 after_stat(p.value.label), sep = "~~~")),
-    label.x = 22,
+    aes(x = setTleaf, y = pr.real, label = paste(after_stat(p.value.label), sep = "")),
+    label.x = 20,
     label.y = 1.5,
-    digits = 2
+    digits = 1
   )+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp)+
-  scale_y_continuous(limits = c(0, 20), name = "Photorespiration Rate")+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
-  theme_minimal()
-
-
+  facet_wrap(~sp, ncol = 7) +
+  scale_y_continuous(limits = c(0, 15), name = "Photorespiration rate")+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base()
+dev.off()
+###### end of discard
 
 ###Plot of pr.percent
 
@@ -268,6 +269,7 @@ s.table <- outs %>%
   summarise(pr.percent.avg = mean(pr.percent),
             se = sd(pr.percent))
 
+svg(filename = "pr-percent.svg", width = 14, height = 5, bg = "transparent")
 ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   geom_point(col="black", size = 1.5)+
   geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
@@ -285,10 +287,78 @@ ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp)+
+  facet_wrap(~sp, ncol = 7)+
   scale_y_continuous(limits = c(0, 1.5), name = "Photorespiration Rate [%]")+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
   theme_minimal()
+dev.off()
+
+
+### Plot showing JO2 and JC2
+
+library(dplyr)
+s.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(JO2.percent.avg = mean(JO2.percent),
+            se = sd(JO2.percent))
+
+svg(filename = "JO2.percent.svg", width = 7, height = 4, bg = "transparent")
+ggplot(s.table, aes(y = JO2.percent.avg, x=setTleaf, group=sp))+
+  geom_point(col="black", size = 1.5)+
+  geom_errorbar(aes(ymin=JO2.percent.avg-se, ymax=JO2.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(JO2.percent.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=JO2.percent, x=setTleaf), se = F, method="lm")+
+  stat_poly_eq(
+    data = outs,
+    formula = y ~ x,
+    aes(x = setTleaf, y = JO2.percent, label = paste(after_stat(eq.label),
+                                                 after_stat(rr.label),
+                                                 after_stat(p.value.label), sep = "~~~")),
+    label.x = 22,
+    label.y = 1.5,
+    digits = 2
+  )+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp)+
+  scale_y_continuous(limits = c(0, 1), name = "Oxygenation proportion (ETR)")+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
+  theme_minimal()
+dev.off()
+
+
+
+
+library(dplyr)
+s.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(JC2.percent.avg = mean(JC2.percent),
+            se = sd(JC2.percent))
+
+svg(filename = "JC2.percent.svg", width = 7, height = 4, bg = "transparent")
+ggplot(s.table, aes(y = JC2.percent.avg, x=setTleaf, group=sp))+
+  geom_point(col="black", size = 1.5)+
+  geom_errorbar(aes(ymin=JC2.percent.avg-se, ymax=JC2.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(JC2.percent.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=JC2.percent, x=setTleaf), se = F, method="lm")+
+  stat_poly_eq(
+    data = outs,
+    formula = y ~ x,
+    aes(x = setTleaf, y = JC2.percent, label = paste(after_stat(eq.label),
+                                                     after_stat(rr.label),
+                                                     after_stat(p.value.label), sep = "~~~")),
+    label.x = 22,
+    label.y = 1.5,
+    digits = 2
+  )+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp)+
+  scale_y_continuous(limits = c(0, 1), name = "Carboxylation proportion (ETR)")+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
+  theme_minimal()
+dev.off()
+
 
 
 
@@ -311,72 +381,6 @@ ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
   geom_boxplot(mapping = aes(group = setTleaf)) + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) +
   #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
   geom_smooth(method = "lm", se = F)
-
-#--------------------------------------------------------------#
-svg(filename = "Figures/anet21p.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = setTleaf, y = corranet)) +
-    theme_bw() +
-    xlab(lab_Tleaf) +
-    ylab("Anet") +
-    geom_point() + facet_wrap(~sp) + ylim(0,30) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-dev.off()
-
-
-svg(filename = "Figures/anet0p.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = setTleaf, y = anet.0p)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("Anet") +
-  geom_point() + facet_wrap(~sp) + ylim(0,30) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-dev.off()
-
-
-
-svg(filename = "Figures/ETR21p.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = setTleaf, y = ETR.21p)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("ETR") +
-  geom_point() + facet_wrap(~sp) + ylim(0,160) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-dev.off()
-
-
-svg(filename = "Figures/ETR0p.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = setTleaf, y = ETR.0p)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("ETR") +
-  geom_point() + facet_wrap(~sp) + ylim(0,160) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-dev.off()
-
-
-svg(filename = "Figures/NPQ21p.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = setTleaf, y = NPQ.21p)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("NPQ") +
-  geom_point() + facet_wrap(~sp) + ylim(-1,-0.997) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-dev.off()
-
-svg(filename = "Figures/NPQ0p.svg", width = 7, height = 4, bg = "transparent")
-ggplot(outs, aes(x = setTleaf, y = NPQ.0p)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("NPQ") +
-  geom_point() + facet_wrap(~sp) + ylim(-1,-0.997) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-dev.off()
 
 
 
@@ -402,12 +406,100 @@ anova(aov(JO2.percent ~  sp * setTleaf, data = outs))  #  Not significant
 anova(aov(pr.percent ~  sp * setTleaf, data = outs))   #  Not significant
 
 
+###### STATISTICAL TESTS #########
 
 
-# Things I wanna test
+## example model fits nlme ---- 
+
+# Here we are running a for loop testing     the relationship between species, setTleaf and the combined effect of them (I.e the temperature response of species), against pr.real (Absolute photorespiration rates ("10")), pr.percent (Proportional photorespiration rates ("11")), anet.21p (Ambient photosynthesis rates ("4")), anet.0p (O2-free photosynthesis rates ("5")) and JO2.percent (proportional oxygenation rates calculated using ETR only ("31)).
 
 
-# Is higher Anet correlated with higher PR? 
-# Is lower ETR correlated to higher PR?
-# 
+colindeces <- c(10, 11, 4, 5, 31)
+method.slope <- c()
+value.slope <- c()
+species.slope <- c()
+
+names(outs)[colindeces[1]]
+
+for (index in 1:length(colindeces)){
+  
+  
+  independentVariable = outs[,colindeces[index]] 
+  
+  mod1 <- nlme::lme(independentVariable ~  sp , data = outs, 
+                    random = ~1|treeid, 
+                    method = "REML", 
+                    na.action=na.omit) ; anova(mod1)
+  print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
+  print(summary(mod1))
+  
+  mod1 <- nlme::lme(independentVariable ~  setTleaf , data = outs, 
+                    random = ~1|sp, 
+                    method = "REML", 
+                    na.action=na.omit) ; anova(mod1)
+  
+  print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
+  print(summary(mod1))
+  mod1 <- nlme::lme(independentVariable ~  sp * setTleaf, 
+                    data = outs, 
+                    random = ~1|treeid, 
+                    method = "REML", 
+                    na.action=na.omit) ; anova(mod1)
+  
+  print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
+  print(summary(mod1))
+  
+  
+  print("----------------------------------------------------------------")
+}
+
+
+library(tidyr)
+
+long_data <- outs %>%
+  gather(key = "method", value = "y", pr.percent, JO2.percent)
+
+# Fit a model with an interaction term between method and setTleaf
+long_model <- lm(y ~ sp * setTleaf * method, data = long_data)
+
+# Check the model summary
+summary(long_model)
+
+
+# Fit the model with and without the interaction term between method and setTleaf
+model_interaction <- lm(y ~ sp * setTleaf * method, data = long_data)
+model_no_interaction <- lm(y ~ sp * setTleaf + method, data = long_data)
+
+# Compare the models using a likelihood ratio test
+anova(model_no_interaction, model_interaction)
+
+# Visualize the comparison
+library(ggplot2)
+ggplot(long_data, aes(x = setTleaf, y = y, color = method)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Add linear regression lines
+  facet_wrap(~sp)+
+  labs(title = "Comparison of Slopes for y1 and y2") +
+  theme_minimal()
+
+
+### post hoc test ------- HSD, honest significant difference 
+
+m7 <- aov(anet.0p ~ sp, data = outs, random = ~1|treeid, method = "REML", na.action=na.omit) ; anova(m7)
+par(las=2)
+par(mar=c(8,8,2,2)) 
+plot(TukeyHSD(m7))
+
+
+t1 <- TukeyHSD(m7)
+t1 <- as.data.frame(t1$sp)
+t1$com <- rownames(t1)
+
+rownames(t1) <- NULL
+colnames(t1) <- c("prdiff","lwr", "upr","padj", "com")
+blah <- subset(t1, padj <= 0.05)
+
+
+
+
 
