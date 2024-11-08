@@ -1,12 +1,12 @@
 #install.packages("Hmisc", dependencies = T)
-
-packages_to_load <- c("drc", "bbmle", "labelled", "MALDIquant", 
-                      "magicfor", "ggplot2", "ggpubr", "ggpmisc", "tidyverse", "broom", 
-                      "Hmisc", "plotly", "PairedData", "DescTools", 
-                      "generalhoslem", "graphics", "nls2", "plyr",
-                      "ggthemes", "ggpubr", "signal", "segmented")
-
-lapply(packages_to_load, library, character.only = TRUE)
+#
+# packages_to_load <- c("drc", "bbmle", "labelled", "MALDIquant", 
+#                      "magicfor", "ggplot2", "ggpubr", "ggpmisc", "tidyverse", #"broom", 
+#                     "Hmisc", "plotly", "PairedData", "DescTools", 
+#                     "generalhoslem", "graphics", "nls2", "plyr",
+#                     "ggthemes", "ggpubr", "signal", "segmented")
+#
+# lapply(packages_to_load, library, character.only = TRUE)
 
 ## lable ----
 ytleaf          <- expression("T"["leaf"]~degree~"C")
@@ -231,13 +231,17 @@ outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 # Making the table for the concatenated PR values for each species and each temperature point.
 
 library(dplyr)
+library(stats)
+library(base)
+library(ggplot2)
+
 s.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.real.avg = mean(pr.real),
             se = sd(pr.real))
 
 
-svg(filename = "pr-raw.svg", width = 16, height = 4.5, bg = "transparent")
+#svg(filename = "pr-raw.svg", width = 16, height = 4.5, bg = "transparent")
 
 ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   geom_point(col="black", size = 1.5)+
@@ -249,7 +253,7 @@ ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
     aes(x = setTleaf, y = pr.real, label = paste(after_stat(p.value.label), sep = "")),
     label.x = 20,
     label.y = 1.5,
-    digits = 1
+    digits = 2
   )+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
@@ -258,7 +262,7 @@ ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   scale_y_continuous(limits = c(0, 15), name = "Net CO2 assimilation rate (0% O2) - Net CO2 assimilation rate (21 % O2)")+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base()
-dev.off()
+#dev.off()
 
 
 ###Plot of pr.percent
@@ -289,6 +293,39 @@ ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   scale_y_continuous(limits = c(0, 1.5), name = "Rp / Net CO2 assimilation rate (21 % O2) (%)")+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
   theme_base()
+dev.off()
+
+
+
+### Plot showing Anet 21p over temp
+
+
+s.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(anet.21p.avg = mean(anet.21p),
+            se = sd(anet.21p))
+
+
+svg(filename = "anet21-raw.svg", width = 16, height = 4.5, bg = "transparent")
+
+ggplot(s.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
+  geom_point(col="black", size = 1.5)+
+  geom_errorbar(aes(ymin=anet.21p.avg-se, ymax=anet.21p.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(anet.21p.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=anet.21p, x=setTleaf), se = F, method="lm")+
+  ggpmisc::stat_poly_eq(
+    data = outs,
+    formula = y ~ x,
+    aes(x = setTleaf, y = anet.21p, label = paste(after_stat(p.value.label), sep = "")),
+    label.x = 20,
+    label.y = 1.5
+  )+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=anet.21p, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp, ncol = 7) +
+  scale_y_continuous(limits = c(0, 25), name = "Net CO2 assimilation rate (21 % O2)")+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base()
 dev.off()
 
 
