@@ -228,69 +228,73 @@ correct_RD(dflist, "./")
 outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
 
+
 # Making the table for the concatenated PR values for each species and each temperature point.
 library(stats)
 library(base)
 library(dplyr)
 library(ggplot2)
 
-s.table <- outs %>%
+absolute.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.real.avg = mean(pr.real),
             se = sd(pr.real))
 
 
+
+
 svg(filename = "pr-raw.svg", width = 16, height = 4.5, bg = "transparent")
 
-ggplot(s.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
-  geom_point(col="black", size = 2)+
-  geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se), width= 2.5)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=pr.real, x=setTleaf), se = F, method="lm")+
-  ggpmisc::stat_poly_eq(
-    data = outs,
-    formula = y ~ x,
-    aes(x = setTleaf, y = pr.real, label = paste(after_stat(p.value.label), sep = "")),
-    label.x = 20,
-    label.y = 1.5,
-    digits = 2
-  )+
+ggplot(absolute.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
+  geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se),col ="grey70", width= 2.5)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=pr.real, x=setTleaf), se = F, method="lm", col = "grey80")+
+  geom_point(col="grey30", size = 3, pch = 21, fill = "cornflowerblue", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7) +
-  scale_y_continuous(limits = c(0, 15), name = "Net CO2 assimilation rate (0% O2) - Net CO2 assimilation rate (21 % O2)")+
+  scale_y_continuous(limits = c(0, 15), name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
-  ggthemes::theme_base()
+  ggthemes::theme_base() +
+theme(axis.text.y = element_text(size = 15), 
+      axis.text.x = element_text(size = 15),
+      panel.border = element_rect(color = "grey70"))
 dev.off()
 
 
 ###Plot of pr.percent
 
 library(dplyr)
-s.table <- outs %>%
+percent.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.percent.avg = mean(pr.percent),
             se = sd(pr.percent))
 
 svg(filename = "pr-percent.svg", width = 16, height = 4.5, bg = "transparent")
-ggplot(s.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
-  geom_point(col="black", size = 2)+
-  geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se), width= 2.5)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=pr.percent, x=setTleaf), se = F, method="lm")+
-  ggpmisc::stat_poly_eq(
-    data = outs,
-    formula = y ~ x,
-    aes(x = setTleaf, y = pr.percent, label = paste(after_stat(p.value.label), sep = "~~~")),
-    label.x = 22,
-    label.y = 1.5,
-  )+
+
+ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
+   #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=pr.percent, x=setTleaf), se = F, method="lm", col = "grey80")+
+  # ggpmisc::stat_poly_eq(
+  #   data = outs,
+  #   formula = y ~ x,
+  #   aes(x = setTleaf, y = pr.percent, label = paste(after_stat(p.value.label), sep = "~~~")),
+  #   label.x = 22,
+  #   label.y = 1.5,
+  # )+
+  geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se),col ="grey70", width= 2.5)+
+  geom_point(col="grey30", size = 3, pch = 21, fill = "red3", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7)+
-  scale_y_continuous(limits = c(0, 1.5), name = "Rp / Net CO2 assimilation rate (21 % O2) (%)")+
+  scale_y_continuous(limits = c(0, 1.5), name = 
+                       expression(paste(italic(R)[p]/italic(A)[Net])))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
-  ggthemes::theme_base()
+  ggthemes::theme_base() +
+theme(axis.text.y = element_text(size = 15), 
+      axis.text.x = element_text(size = 15),
+      panel.border = element_rect(color = "grey70"))
 dev.off()
 
 
@@ -298,7 +302,7 @@ dev.off()
 ### Plot showing Anet 21p over temp
 
 
-s.table <- outs %>%
+anet.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(anet.21p.avg = mean(anet.21p),
             se = sd(anet.21p))
@@ -306,24 +310,21 @@ s.table <- outs %>%
 
 svg(filename = "anet21-raw.svg", width = 16, height = 4.5, bg = "transparent")
 
-ggplot(s.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
-  geom_point(col="black", size = 2)+
-  geom_errorbar(aes(ymin=anet.21p.avg-se, ymax=anet.21p.avg+se), width= 2.5) + #pmin can be used to cap the ymax. (e.g., pmin(anet.21p.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=anet.21p, x=setTleaf), se = F, method="lm")+
-  ggpmisc::stat_poly_eq(
-    data = outs,
-    formula = y ~ x,
-    aes(x = setTleaf, y = anet.21p, label = paste(after_stat(p.value.label), sep = "")),
-    label.x = 20,
-    label.y = 15
-  )+
+ggplot(anet.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
+   #pmin can be used to cap the ymax. (e.g., pmin(anet.21p.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=anet.21p, x=setTleaf), se = F, method="lm", col = "grey80")+
+  geom_errorbar(aes(ymin=anet.21p.avg-se, ymax=anet.21p.avg+se),col ="grey70", width= 2.5) +
+  geom_point(col="grey30", size = 3, pch = 21, fill = "limegreen", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=anet.21p, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7) +
-  scale_y_continuous(limits = c(0, 25), name = "Net CO2 assimilation rate (21 % O2)")+
+  scale_y_continuous(limits = c(0, 25), name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
-  ggthemes::theme_base()
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70"))
 dev.off()
 
 
@@ -466,14 +467,15 @@ for (index in 1:length(colindeces)){
   print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
   print(summary(mod1))
   
-  mod1 <- nlme::lme(independentVariable ~  setTleaf , data = outs, 
+  mod2 <- nlme::lme(independentVariable ~  setTleaf , data = outs, 
                     random = ~1|sp, 
                     method = "REML", 
                     na.action=na.omit) ; anova(mod1)
   
   print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
   print(summary(mod1))
-  mod1 <- nlme::lme(independentVariable ~  sp * setTleaf, 
+  
+  mod3 <- nlme::lme(independentVariable ~  sp * setTleaf, 
                     data = outs, 
                     random = ~1|treeid, 
                     method = "REML", 
@@ -485,6 +487,17 @@ for (index in 1:length(colindeces)){
   
   print("----------------------------------------------------------------")
 }
+
+
+mod4 <- nlme::lme(independentVariable ~  pr.real , data = outs, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod1)
+print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
+print(summary(mod1))
+
+
+
 
 
 library(tidyr)
