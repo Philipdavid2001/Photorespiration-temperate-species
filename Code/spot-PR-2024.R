@@ -227,6 +227,15 @@ correct_RD(dflist, "./")
 
 outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
+outs$sp <- factor(outs$sp, levels = c(
+  "Betula pendula",         
+  "Fagus sylvatica",         
+  "Betula pubescens",       
+  "Acer platanoides", 
+  "Tilia cordata",
+  "Corylus avellana",       
+  "Scandosorbus intermedia"))
+
 
 
 # Making the table for the concatenated PR values for each species and each temperature point.
@@ -235,15 +244,18 @@ library(base)
 library(dplyr)
 library(ggplot2)
 
+
+
+
+## Plotting absolute Rp over temp##---------------------------------###
+
+svg(filename = "pr-raw.svg", width = 16, height = 4.5, bg = "transparent")
+
+
 absolute.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.real.avg = mean(pr.real),
             se = sd(pr.real))
-
-
-
-
-svg(filename = "pr-raw.svg", width = 16, height = 4.5, bg = "transparent")
 
 ggplot(absolute.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se),col ="grey70", width= 2.5)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
@@ -262,44 +274,10 @@ theme(axis.text.y = element_text(size = 15),
 dev.off()
 
 
-###Plot of pr.percent
 
-library(dplyr)
-percent.table <- outs %>%
-  group_by(sp, setTleaf) %>%
-  summarise(pr.percent.avg = mean(pr.percent),
-            se = sd(pr.percent))
+### Plot showing Anet 21p over temp##-------------------------------###
 
-svg(filename = "pr-percent.svg", width = 16, height = 4.5, bg = "transparent")
-
-ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
-   #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=pr.percent, x=setTleaf), se = F, method="lm", col = "grey80")+
-  # ggpmisc::stat_poly_eq(
-  #   data = outs,
-  #   formula = y ~ x,
-  #   aes(x = setTleaf, y = pr.percent, label = paste(after_stat(p.value.label), sep = "~~~")),
-  #   label.x = 22,
-  #   label.y = 1.5,
-  # )+
-  geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se),col ="grey70", width= 2.5)+
-  geom_point(col="grey30", size = 3, pch = 21, fill = "red3", stroke = 0.85)+
-  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
-  # formula = y~x,
-  # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp, ncol = 7)+
-  scale_y_continuous(limits = c(0, 1.5), name = 
-                       expression(paste(italic(R)[p]/italic(A)[Net])))+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
-  ggthemes::theme_base() +
-theme(axis.text.y = element_text(size = 15), 
-      axis.text.x = element_text(size = 15),
-      panel.border = element_rect(color = "grey70"))
-dev.off()
-
-
-
-### Plot showing Anet 21p over temp
+svg(filename = "anet21-raw.svg", width = 16, height = 4.5, bg = "transparent")
 
 
 anet.table <- outs %>%
@@ -307,8 +285,6 @@ anet.table <- outs %>%
   summarise(anet.21p.avg = mean(anet.21p),
             se = sd(anet.21p))
 
-
-svg(filename = "anet21-raw.svg", width = 16, height = 4.5, bg = "transparent")
 
 ggplot(anet.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
    #pmin can be used to cap the ymax. (e.g., pmin(anet.21p.avg+se, 1.0))
@@ -328,116 +304,283 @@ ggplot(anet.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
 dev.off()
 
 
-### Plot showing JO2 and JC2
 
-library(dplyr)
-s.table <- outs %>%
+
+
+###Plot of pr.percent##-----------------------------------------###
+svg(filename = "pr-percent.svg", width = 16, height = 4.5, bg = "transparent")
+
+
+
+percent.table <- outs %>%
   group_by(sp, setTleaf) %>%
-  summarise(JO2.percent.avg = mean(JO2.percent),
-            se = sd(JO2.percent))
+  summarise(pr.percent.avg = mean(pr.percent),
+            se = sd(pr.percent))
 
-svg(filename = "JO2.percent.svg", width = 7, height = 4, bg = "transparent")
-ggplot(s.table, aes(y = JO2.percent.avg, x=setTleaf, group=sp))+
-  geom_point(col="black", size = 1.5)+
-  geom_errorbar(aes(ymin=JO2.percent.avg-se, ymax=JO2.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(JO2.percent.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=JO2.percent, x=setTleaf), se = F, method="lm")+
-  stat_poly_eq(
-    data = outs,
-    formula = y ~ x,
-    aes(x = setTleaf, y = JO2.percent, label = paste(after_stat(eq.label),
-                                                 after_stat(rr.label),
-                                                 after_stat(p.value.label), sep = "~~~")),
-    label.x = 22,
-    label.y = 1.5,
-    digits = 2
-  )+
+
+ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
+  #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(data = outs, mapping = aes(y=pr.percent, x=setTleaf), se = F, method="lm", col = "grey80")+
+  # ggpmisc::stat_poly_eq(
+  #   data = outs,
+  #   formula = y ~ x,
+  #   aes(x = setTleaf, y = pr.percent, label = paste(after_stat(p.value.label), sep = "~~~")),
+  #   label.x = 22,
+  #   label.y = 1.5,
+  # )+
+  geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se),col ="grey70", width= 2.5)+
+  geom_point(col="grey30", size = 3, pch = 21, fill = "red3", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp)+
-  scale_y_continuous(limits = c(0, 1), name = "Oxygenation proportion (ETR)")+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
-  theme_minimal()
+  facet_wrap(~sp, ncol = 7)+
+  scale_y_continuous(limits = c(0, 1.5), name = 
+                       expression(paste(italic(R)[p]/italic(A)[Net])))+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base() +
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70"))
+dev.off()
+
+
+##---------------------------------------------------------##
+
+
+###########
+outs$tl <- as.factor(outs$setTleaf)
+
+
+
+## photorespiration across species boxplot (ignoring temp). First one is for just the relationship, the second one shows the temperature spread.
+
+svg(filename = "Rp-species.svg", width = 12, height = 6, bg = "transparent")
+
+ggplot(outs, aes(y = pr.real, x=sp)) +
+  geom_boxplot(aes(x = sp, y = pr.real), outliers =  F)  +
+  geom_jitter(aes(size = tl),  color = "grey", alpha = 0) +
+  
+  xlab(" ") +
+  scale_y_continuous(limits = c(0,15), 
+                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  coord_flip()
 dev.off()
 
 
 
 
-library(dplyr)
-s.table <- outs %>%
-  group_by(sp, setTleaf) %>%
-  summarise(JC2.percent.avg = mean(JC2.percent),
-            se = sd(JC2.percent))
+svg(filename = "Rp-species-spotted.svg", width = 12, height = 6, bg = "transparent")
 
-svg(filename = "JC2.percent.svg", width = 7, height = 4, bg = "transparent")
-ggplot(s.table, aes(y = JC2.percent.avg, x=setTleaf, group=sp))+
-  geom_point(col="black", size = 1.5)+
-  geom_errorbar(aes(ymin=JC2.percent.avg-se, ymax=JC2.percent.avg+se), width=.2)+ #pmin can be used to cap the ymax. (e.g., pmin(JC2.percent.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=JC2.percent, x=setTleaf), se = F, method="lm")+
-  stat_poly_eq(
-    data = outs,
-    formula = y ~ x,
-    aes(x = setTleaf, y = JC2.percent, label = paste(after_stat(eq.label),
-                                                     after_stat(rr.label),
-                                                     after_stat(p.value.label), sep = "~~~")),
-    label.x = 22,
-    label.y = 1.5,
-    digits = 2
-  )+
-  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
-  # formula = y~x,
-  # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp)+
-  scale_y_continuous(limits = c(0, 1), name = "Carboxylation proportion (ETR)")+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature [°C]")+
-  theme_minimal()
+ggplot(outs, aes(y = pr.real, x=sp)) +
+  geom_boxplot(aes(x = sp, y = pr.real), outliers =  F)  +
+  geom_jitter(aes(size = tl),  color = "grey", alpha = 0.5) +
+  xlab(" ") +
+  scale_y_continuous(limits = c(0,15), 
+                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 20), 
+        axis.text.x = element_text(size = 20),
+        panel.border = element_rect(color = "grey70")) +
+  coord_flip()
+dev.off()
+
+
+
+###------- Mixed effects models for Rp----##
+
+mod4 <- nlme::lme(pr.real ~  sp, data = outs, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod4)
+
+mod4 <- nlme::lme(pr.real ~  setTleaf, data = outs, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod4)
+
+mod4 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod4)
+
+
+#------------------------------#
+
+
+## photosynthesis across species boxplot (ignoring temp). First one is for just the relationship, the second one shows the temperature spread.
+
+svg(filename = "Anet-species.svg", width = 12, height = 6, bg = "transparent")
+
+ggplot(outs, aes(y = anet.21p, x=sp)) +
+  geom_boxplot(aes(x = sp, y = anet.21p), outliers =  F)  +
+  geom_jitter(aes(size = tl),  color = "grey", alpha = 0) +
+  
+  xlab(" ") +
+  scale_y_continuous(limits = c(0,25), 
+                     name = expression(paste(italic(A)[net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  coord_flip()
+dev.off()
+
+
+svg(filename = "Anet-species-spotted.svg", width = 12, height = 6, bg = "transparent")
+
+ggplot(outs, aes(y = anet.21p, x=sp)) +
+  geom_boxplot(aes(x = sp, y = anet.21p), outliers =  F)  +
+  geom_jitter(aes(size = tl),  color = "grey", alpha = 0.5) +
+  xlab(" ") +
+  scale_y_continuous(limits = c(0,25), 
+                     name = expression(paste(italic(A)[net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 20), 
+        axis.text.x = element_text(size = 20),
+        panel.border = element_rect(color = "grey70")) +
+  coord_flip()
+dev.off()
+
+
+###------- Mixed effects models for Anet----##
+
+mod5 <- nlme::lme(anet.21p ~  sp, data = outs, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod5)
+
+mod5 <- nlme::lme(anet.21p ~  setTleaf, data = outs, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod5)
+
+mod5 <- nlme::lme(anet.21p ~  sp * setTleaf, data = outs, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod5)
+
+
+
+
+# Does higher photorespiration rates = higher photosynthesis rates??? (spoiler, yes)
+
+svg(filename = "Rp-over-Anet.svg", width = 12, height = 4.5, bg = "transparent")
+
+
+ggplot(outs, aes(y = pr.real, x=anet.21p, pch=sp, color = sp)) +
+  geom_point(size = 3, 
+             stroke = 0.85) +
+  scale_x_continuous(limits = c(0, 25), 
+                     name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+  scale_y_continuous(limits = c(0,15), 
+                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70"))
+dev.off()
+
+#---------------------------------------------------------------------#
+
+svg(filename = "Rp-over-Anet-alltemp.svg", width = 16, height = 4.5, bg = "transparent")
+
+
+ggplot(outs, aes(y = pr.real, x=anet.21p, color=sp)) +
+  geom_smooth(data = outs, mapping = aes(y=pr.real, x=anet.21p), 
+              se = T, method="lm", col = "grey80") +
+  geom_point(size = 3, pch = 21, 
+             stroke = 0.85) +
+  scale_x_continuous(limits = c(0, 25), 
+                     name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+  scale_y_continuous(limits = c(0,15), 
+                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~setTleaf)
+dev.off()
+
+
+######  Creating the dataframes for each temperature for the models ----
+
+outs25 <- subset(outs, setTleaf == 25)
+outs30 <- subset(outs, setTleaf == 30)
+outs35 <- subset(outs, setTleaf == 35)
+
+
+######  Rp against Anet split by temperature ----
+
+mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs25, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs30, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs35, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#-------------------------------#
+
+
+
+#Box plots of pr.percent across the leaf temperatures
+
+ggplot(outs, aes(y = pr.percent, x=tl, color=tl)) +
+  geom_boxplot(aes(x = tl, y = pr.percent, fill = setTleaf)) +
+  geom_jitter() +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = "Leaf Temperature (°C)") +
+  scale_y_continuous(limits = c(0,15), 
+                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70"))
+
+
+#-------- boxplot of Rp over temperature ----_#
+svg(filename = "Rp-over-temp-box.svg", width = 16, height = 4.5, bg = "transparent")
+
+
+ggplot(outs, aes(y = pr.real, x=tl)) +
+  geom_boxplot(aes(x = tl, y = pr.real)) +
+  geom_jitter(aes(color = sp)) +
+  xlab("Leaf Temperature (°C)") +
+  scale_y_continuous(limits = c(0,15), 
+                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70"))
 dev.off()
 
 
 
 
-# Original pr ggplot script
 
-ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_point() + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) 
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  #geom_smooth(method = "lm", se = F)
-
-
-# tweaked 
-ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
-  theme_bw() +
-  xlab(lab_Tleaf) +
-  ylab("PR") +
-  geom_boxplot(mapping = aes(group = setTleaf)) + facet_wrap(~sp) + ylim(0,1) + xlim(20,40) +
-  #geom_errorbar(aes(ymin=pr-se, ymax=pr+se), width=.2) + 
-  geom_smooth(method = "lm", se = F)
-
-
-
-## photorespiration proportion ----- 
-
-anova(aov(pr.real ~  sp, data = outs))
-anova(aov(pr.real ~  corranet, data = outs))
-anova(aov(pr.real ~  setTleaf, data = outs))
-anova(aov(pr.real ~  sp * setTleaf, data = outs))
-
-m1 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, random = ~1|treeid)
-anova(aov(pr.real ~  sp * setTleaf, data = outs))
-
-m1
-
-
-
-anova(aov(JO2.percent ~  sp, data = outs))             #  Very significant
-anova(aov(JO2.percent ~  setTleaf, data = outs))       #  Very significant
-anova(aov(pr.percent ~  sp, data = outs))              #  Very significant
-anova(aov(pr.percent ~  setTleaf, data = outs))        #  Very significant
-anova(aov(JO2.percent ~  sp * setTleaf, data = outs))  #  Not significant
-anova(aov(pr.percent ~  sp * setTleaf, data = outs))   #  Not significant
 
 
 ###### STATISTICAL TESTS #########
@@ -449,6 +592,7 @@ anova(aov(pr.percent ~  sp * setTleaf, data = outs))   #  Not significant
 
 
 colindeces <- c(10, 11, 4, 5, 31)
+colindeces <- c(10)
 method.slope <- c()
 value.slope <- c()
 species.slope <- c()
@@ -467,7 +611,7 @@ for (index in 1:length(colindeces)){
   print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
   print(summary(mod1))
   
-  mod2 <- nlme::lme(independentVariable ~  setTleaf , data = outs, 
+  mod1 <- nlme::lme(independentVariable ~  setTleaf , data = outs, 
                     random = ~1|sp, 
                     method = "REML", 
                     na.action=na.omit) ; anova(mod1)
@@ -475,7 +619,7 @@ for (index in 1:length(colindeces)){
   print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
   print(summary(mod1))
   
-  mod3 <- nlme::lme(independentVariable ~  sp * setTleaf, 
+  mod1 <- nlme::lme(independentVariable ~  sp * setTleaf, 
                     data = outs, 
                     random = ~1|treeid, 
                     method = "REML", 
@@ -489,13 +633,36 @@ for (index in 1:length(colindeces)){
 }
 
 
-mod4 <- nlme::lme(independentVariable ~  pr.real , data = outs, 
+outs25 <- subset(outs, setTleaf == 25)
+outs30 <- subset(outs, setTleaf == 30)
+outs35 <- subset(outs, setTleaf == 35)
+
+
+
+######----
+
+
+######  Rp against species split by treeid nested for each temp point ----
+ mod4 <- nlme::lme(pr.real ~  sp, data = outs25, 
+                   random = ~1|treeid, 
+                   method = "REML", 
+                   na.action=na.omit) ; anova(mod4)
+ 
+ mod4 <- nlme::lme(pr.real ~  sp, data = outs30, 
+                   random = ~1|treeid, 
+                   method = "REML", 
+                   na.action=na.omit) ; anova(mod4)
+ 
+ mod4 <- nlme::lme(pr.real ~  sp, data = outs35, 
+                   random = ~1|treeid, 
+                   method = "REML", 
+                   na.action=na.omit) ; anova(mod4)
+ 
+
+mod4 <- nlme::lme(pr.real ~  anet.21p * setTleaf, data = outs, 
                   random = ~1|sp, 
                   method = "REML", 
-                  na.action=na.omit) ; anova(mod1)
-print(paste("This analysis is based on :", names(outs)[colindeces[index]]))
-print(summary(mod1))
-
+                  na.action=na.omit) ; anova(mod4)
 
 
 
