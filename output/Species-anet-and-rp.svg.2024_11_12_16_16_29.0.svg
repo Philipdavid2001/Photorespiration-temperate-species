@@ -3019,10 +3019,7 @@
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-241.2019,-233.20895)"
      id="text252"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect252);display:inline;fill:#000000;stroke-width:0.942667"><tspan
-       x="2291.6465"
-       y="873.0906"
-       id="tspan1">Leaf temperature (°C)</tspan></text><g
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect252);display:inline;fill:#000000;stroke-width:0.942667">Leaf temperature (°C)</text><g
      id="g276"
      transform="matrix(1.6729995,0,0,1.6439644,-696.43973,-553.52287)"><g
        style="fill:#000000;fill-opacity:1"
@@ -3660,22 +3657,13 @@
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-428.76353,-87.243517)"
      id="text266"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect266);display:inline;fill:#000000;stroke-width:0.942667"><tspan
-       x="2291.6465"
-       y="854.15463"
-       id="tspan2">F-value = 32.8354
-</tspan><tspan
-       x="2291.6465"
-       y="880.82126"
-       id="tspan3">P-value = &lt;.0001
-</tspan><tspan
-       x="2291.6465"
-       y="907.48788"
-       id="tspan6">R<tspan
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect266);display:inline;fill:#000000;stroke-width:0.942667">F-value = 32.8354
+P-value = &lt;.0001
+R<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan4">p</tspan> ~  T<tspan
+   id="tspan517">p</tspan> ~  T<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan5">leaf</tspan>  1|species</tspan></text><g
+   id="tspan636">leaf</tspan>  1|species</text><g
      clip-path="url(#clip1)"
      clip-rule="nonzero"
      id="g62"
@@ -3777,20 +3765,11 @@
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-421.50604,-459.97726)"
      id="text267"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect267);display:inline;fill:#000000;stroke-width:0.942667"><tspan
-       x="2291.6465"
-       y="854.15463"
-       id="tspan7">F-value = 5.3971
-</tspan><tspan
-       x="2291.6465"
-       y="880.82126"
-       id="tspan8">P-value = 1e-04
-</tspan><tspan
-       x="2291.6465"
-       y="907.48788"
-       id="tspan10">R<tspan
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect267);display:inline;fill:#000000;stroke-width:0.942667">F-value = 5.3971
+P-value = 1e-04
+R<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan9">p</tspan> ~  species  1|treeid</tspan></text><g
+   id="tspan515">p</tspan> ~  species  1|treeid</text><g
      style="fill:#000000;fill-opacity:1"
      id="g369-1"
      transform="translate(54.543892,967.07841)"><use
@@ -4160,23 +4139,14 @@
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-1064.8765,-87.243517)"
      id="text265"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect265);display:inline;fill:#000000;stroke-width:0.942667"><tspan
-       x="2291.6465"
-       y="854.15463"
-       id="tspan11">F-value = 0.0075
-</tspan><tspan
-       x="2291.6465"
-       y="880.82126"
-       id="tspan12">P-value = 0.9311
-</tspan><tspan
-       x="2291.6465"
-       y="907.48788"
-       id="tspan15">A<tspan
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect265);display:inline;fill:#000000;stroke-width:0.942667">F-value = 0.0075
+P-value = 0.9311
+A<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan13">net </tspan>~ T<tspan
+   id="tspan516">net </tspan>~ T<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan14">leaf</tspan>  1|species
-</tspan></text><path
+   id="tspan635">leaf</tspan>  1|species
+</text><path
      style="fill:#bdbdbd;fill-opacity:0.501961;fill-rule:nonzero;stroke:#bdbdbd;stroke-width:0.708661;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:0.501961"
      d="m 585.18791,781.72065 c 0,3.31641 -4.9766,3.31641 -4.9766,0 0,-3.3164 4.9766,-3.3164 4.9766,0"
      id="path119-2" /><path
@@ -4801,20 +4771,11 @@
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-1060.3228,-459.97726)"
      id="text252-3"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect252-3);display:inline;fill:#000000;stroke-width:0.942667"><tspan
-       x="2291.6465"
-       y="854.15463"
-       id="tspan16">F-value = 17.7351
-</tspan><tspan
-       x="2291.6465"
-       y="880.82126"
-       id="tspan17">P-value = &lt;.0001
-</tspan><tspan
-       x="2291.6465"
-       y="907.48788"
-       id="tspan19">A<tspan
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect252-3);display:inline;fill:#000000;stroke-width:0.942667">F-value = 17.7351
+P-value = &lt;.0001
+A<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan18">net</tspan> ~  species  1|treeid</tspan></text><g
+   id="tspan513">net</tspan> ~  species  1|treeid</text><g
      style="fill:#000000;fill-opacity:1"
      id="g406"
      transform="translate(-5.044818,99.046916)"><use
@@ -5291,21 +5252,15 @@
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-1389.7548,-578.20895)"
      id="text509"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect509);display:inline;fill:#000000;stroke-width:0.942667"><tspan
-       x="2291.6465"
-       y="878.45496"
-       id="tspan21">Photosynthesis rates (A<tspan
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect509);display:inline;fill:#000000;stroke-width:0.942667">Photosynthesis rates (A<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan20">net</tspan>)</tspan></text><text
+   id="tspan511">net</tspan>)</text><text
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-774.58109,-578.20895)"
      id="text510"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect511);display:inline;fill:#000000;stroke-width:0.942667"><tspan
-       x="2291.6465"
-       y="878.45496"
-       id="tspan23">Photorespiration rates (R<tspan
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect511);display:inline;fill:#000000;stroke-width:0.942667">Photorespiration rates (R<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan22">p</tspan>)</tspan></text><path
+   id="tspan512">p</tspan>)</text><path
      style="fill:none;stroke:#000000;stroke-width:1.16398;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1"
      d="m 247.14882,832.76371 h 7.20312"
      id="path517" /><path

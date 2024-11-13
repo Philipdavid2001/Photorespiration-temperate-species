@@ -407,6 +407,25 @@ mod4 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs,
                   method = "REML", 
                   na.action=na.omit) ; anova(mod4)
 
+###----Test for pr.percent----------------#####
+
+
+mod6 <- nlme::lme(pr.percent ~  sp, data = outs, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+mod6 <- nlme::lme(pr.percent ~  setTleaf, data = outs, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+mod6 <- nlme::lme(pr.percent ~  sp * setTleaf, data = outs, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
 
 #------------------------------#
 
@@ -468,20 +487,23 @@ mod5 <- nlme::lme(anet.21p ~  sp * setTleaf, data = outs,
 
 # Does higher photorespiration rates = higher photosynthesis rates??? (spoiler, yes)
 
-svg(filename = "Rp-over-Anet.svg", width = 12, height = 4.5, bg = "transparent")
+svg(filename = "Rp-over-Anet.svg", width = 7, height = 4.5, bg = "transparent")
 
 
-ggplot(outs, aes(y = pr.real, x=anet.21p, pch=sp, color = sp)) +
+ggplot(outs, aes(y = pr.real, x=anet.21p)) +
   geom_point(size = 3, 
-             stroke = 0.85) +
+             stroke = 0.85, aes(color = sp, shape = sp)) +
+  geom_smooth(se = T, method="lm", col = "grey50") +
   scale_x_continuous(limits = c(0, 25), 
                      name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
-  scale_y_continuous(limits = c(0,15), 
+  scale_y_continuous(limits = c(0,25), 
                      name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
   ggthemes::theme_base()+
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
-        panel.border = element_rect(color = "grey70"))
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50")
 dev.off()
 
 #---------------------------------------------------------------------#
@@ -489,19 +511,21 @@ dev.off()
 svg(filename = "Rp-over-Anet-alltemp.svg", width = 16, height = 4.5, bg = "transparent")
 
 
-ggplot(outs, aes(y = pr.real, x=anet.21p, color=sp)) +
+ggplot(outs, aes(y = pr.real, x=anet.21p, color = sp)) +
   geom_smooth(data = outs, mapping = aes(y=pr.real, x=anet.21p), 
               se = T, method="lm", col = "grey80") +
-  geom_point(size = 3, pch = 21, 
-             stroke = 0.85) +
+  geom_point(size = 3, 
+             stroke = 0.85, aes(color = sp, shape = sp)) +
   scale_x_continuous(limits = c(0, 25), 
                      name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
-  scale_y_continuous(limits = c(0,15), 
+  scale_y_continuous(limits = c(0,25), 
                      name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
   ggthemes::theme_base()+
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
         panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2))+
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") +
   facet_wrap(~setTleaf)
 dev.off()
 
@@ -515,20 +539,26 @@ outs35 <- subset(outs, setTleaf == 35)
 
 ######  Rp against Anet split by temperature ----
 
-mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs25, 
-                  random = ~1|sp, 
-                  method = "REML", 
-                  na.action=na.omit) ; anova(mod6)
+mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs, 
+                 random = ~1|sp, 
+                 method = "REML", 
+                 na.action=na.omit) ; anova(mod6)
 
-mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs30, 
-                  random = ~1|sp, 
-                  method = "REML", 
-                  na.action=na.omit) ; anova(mod6)
 
-mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs35, 
+mod7 <- nlme::lme(pr.real ~  anet.21p, data = outs25, 
                   random = ~1|sp, 
                   method = "REML", 
-                  na.action=na.omit) ; anova(mod6)
+                  na.action=na.omit) ; anova(mod7)
+
+mod7 <- nlme::lme(pr.real ~  anet.21p, data = outs30, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod7)
+
+mod7 <- nlme::lme(pr.real ~  anet.21p, data = outs35, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod7)
 
 
 
