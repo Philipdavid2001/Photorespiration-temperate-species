@@ -372,12 +372,11 @@ dev.off()
 
 
 
-
 svg(filename = "Rp-species-spotted.svg", width = 12, height = 6, bg = "transparent")
 
 ggplot(outs, aes(y = pr.real, x=sp)) +
   geom_boxplot(aes(x = sp, y = pr.real), outliers =  F)  +
-  geom_jitter(aes(size = tl),  color = "grey", alpha = 0.5) +
+  geom_jitter(aes(size = tl), color = as.factor(outs$setTleaf), alpha = 0.5) +
   xlab(" ") +
   scale_y_continuous(limits = c(0,15), 
                      name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
@@ -453,7 +452,7 @@ svg(filename = "Anet-species-spotted.svg", width = 12, height = 6, bg = "transpa
 
 ggplot(outs, aes(y = anet.21p, x=sp)) +
   geom_boxplot(aes(x = sp, y = anet.21p), outliers =  F)  +
-  geom_jitter(aes(size = tl),  color = "grey", alpha = 0.5) +
+  geom_jitter(aes(size = tl), color = as.factor(outs$setTleaf), alpha = 0.5) +
   xlab(" ") +
   scale_y_continuous(limits = c(0,25), 
                      name = expression(paste(italic(A)[net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+

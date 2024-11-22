@@ -26,8 +26,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="pt"
      inkscape:zoom="0.34802912"
-     inkscape:cx="839.01026"
-     inkscape:cy="768.61385"
+     inkscape:cx="563.17127"
+     inkscape:cy="142.22948"
      inkscape:window-width="1920"
      inkscape:window-height="974"
      inkscape:window-x="-11"
@@ -1390,35 +1390,35 @@
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect252-3);display:inline;fill:#000000;stroke-width:0.942667"><tspan
        x="2291.6465"
        y="854.15463"
-       id="tspan1">F-value = 4.0502
+       id="tspan3">F-value = 4.0
 </tspan><tspan
        x="2291.6465"
        y="880.82126"
-       id="tspan2">P-value = 0.0012
+       id="tspan24">P-value = 0.0012
 </tspan><tspan
        x="2291.6465"
        y="907.48788"
-       id="tspan6">R<tspan
+       id="tspan27">R<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan4">p</tspan> ~  species * T<tspan
+   id="tspan25">p</tspan> ~  species * T<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan5">leaf</tspan>  1|treeid</tspan></text><text
+   id="tspan26">leaf</tspan>  1| treeid</tspan></text><text
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-1217.0205,-249.30068)"
      id="text467"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect467);display:inline;fill:#000000;stroke-width:0.942667"><tspan
        x="2291.6465"
        y="861.64085"
-       id="tspan7">Leaf temperature (°C)</tspan></text><text
+       id="tspan28">Leaf temperature (°C)</tspan></text><text
      xml:space="preserve"
      transform="matrix(0.75,0,0,0.75,-1323.468,-599.63224)"
      id="text510"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect511);display:inline;fill:#2167e4;fill-opacity:1;stroke-width:0.942667"><tspan
        x="2291.6465"
        y="878.45496"
-       id="tspan9">Photorespiration rates (R<tspan
+       id="tspan30">Photorespiration rates (R<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan8">p</tspan>)</tspan></text><g
+   id="tspan29">p</tspan>)</tspan></text><g
      style="fill:#000000;fill-opacity:1"
      id="g432-5"
      transform="translate(5.8478687,485.57512)"><use
@@ -1448,77 +1448,77 @@
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect252-3-9);display:inline;fill:#000000;stroke-width:0.942667"><tspan
          x="2291.6465"
          y="854.16006"
-         id="tspan10">Betula
+         id="tspan31">Betula
 </tspan><tspan
          x="2291.6465"
          y="880.82669"
-         id="tspan11">pendula</tspan></text><text
+         id="tspan32">pendula</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.75,0,0,0.75,-1494.5602,-531.00008)"
        id="text460"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect460);display:inline;fill:#000000;stroke-width:0.942667"><tspan
          x="2291.6465"
          y="854.16006"
-         id="tspan12">Fagus
+         id="tspan33">Fagus
 </tspan><tspan
          x="2291.6465"
          y="880.82669"
-         id="tspan13">sylvatica</tspan></text><text
+         id="tspan34">sylvatica</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.75,0,0,0.75,-1337.6381,-530.9825)"
        id="text461"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect461);display:inline;fill:#000000;stroke-width:0.942667"><tspan
          x="2291.6465"
          y="854.16006"
-         id="tspan14">Betula
+         id="tspan35">Betula
 </tspan><tspan
          x="2291.6465"
          y="880.82669"
-         id="tspan15">pubescens</tspan></text><text
+         id="tspan36">pubescens</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.75,0,0,0.75,-1181.3061,-530.9825)"
        id="text462"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect462);display:inline;fill:#000000;stroke-width:0.942667"><tspan
          x="2291.6465"
          y="854.16006"
-         id="tspan16">Acer
+         id="tspan37">Acer
 </tspan><tspan
          x="2291.6465"
          y="880.82669"
-         id="tspan17">platanoides</tspan></text><text
+         id="tspan38">platanoides</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.75,0,0,0.75,-1024.7402,-529.16316)"
        id="text463"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect463);display:inline;fill:#000000;stroke-width:0.942667"><tspan
          x="2291.6465"
          y="854.16006"
-         id="tspan18">Tilia
+         id="tspan39">Tilia
 </tspan><tspan
          x="2291.6465"
          y="880.82669"
-         id="tspan19">cordata</tspan></text><text
+         id="tspan40">cordata</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.75,0,0,0.75,-870.05217,-531.00007)"
        id="text464"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect464);display:inline;fill:#000000;stroke-width:0.942667"><tspan
          x="2291.6465"
          y="854.16006"
-         id="tspan20">Corylus
+         id="tspan41">Corylus
 </tspan><tspan
          x="2291.6465"
          y="880.82669"
-         id="tspan21">avellana</tspan></text><text
+         id="tspan42">avellana</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.75,0,0,0.75,-712.96123,-529.19392)"
        id="text465"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0.01px;word-spacing:0px;white-space:pre;shape-inside:url(#rect465);display:inline;fill:#000000;stroke-width:0.942667"><tspan
          x="2291.6465"
          y="854.16006"
-         id="tspan22">Scandosorbus
+         id="tspan43">Scandosorbus
 </tspan><tspan
          x="2291.6465"
          y="880.82669"
-         id="tspan23">intermedia</tspan></text></g><path
+         id="tspan44">intermedia</tspan></text></g><path
      style="fill:none;stroke:#b3b3b3;stroke-width:1.06698;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-opacity:1"
      d="M 97.918182,183.86028 H 114.97287"
      id="path94-7" /><path
