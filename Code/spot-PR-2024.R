@@ -500,6 +500,44 @@ pt <- outs %>%
             ps = mean(anet.21p),
             psse = sd(anet.21p)/ sqrt(length(anet.21p)))
 
+pt25 <- subset(pt, setTleaf == 25)
+pt30 <- subset(pt, setTleaf == 30)
+pt35 <- subset(pt, setTleaf == 35)
+
+
+mod6 <- nlme::lme(pr ~  ps , data = pt25, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+
+mod6 <- nlme::lme(pr ~  ps , data = pt30, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+mod6 <- nlme::lme(pr ~  ps , data = pt35, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+cor25 <- cor(pt25$ps, pt25$pr, method = 'pearson'); round(cor25, 2) 
+cor30 <- cor(pt30$ps, pt30$pr, method = 'pearson'); round(cor30, 2)
+cor35 <- cor(pt35$ps, pt35$pr, method = 'pearson'); round(cor35, 2)
+
+
+
+
+
+
+######  Rp against Anet split by temperature ----
+
+mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
 
 
 
