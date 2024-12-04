@@ -36,8 +36,7 @@ df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", 
 df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-Birch-Ecotypes.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
-#-----------------------------------------------------#
-
+###### Photorespiration rate calculation loop -----------------------------------------------------
 
 ## use the following filters as necessary
 df     <- subset(df, dq == "yes") # eliminates unreliable values.
@@ -225,6 +224,9 @@ correct_RD <- function(data, output_path){
 correct_RD(dflist, "./")
 
 
+####### plotting output -------
+
+
 outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
 
 outs$sp <- factor(outs$sp, levels = c(
@@ -249,17 +251,16 @@ library(ggplot2)
 
 ## Plotting absolute Rp over temp##---------------------------------###
 
-svg(filename = "pr-raw.svg", width = 16, height = 4.5, bg = "transparent")
-
-
+## Figure 1A ----
+svg(filename = "pr-raw-new.svg", width = 16, height = 4.5, bg = "transparent")
 absolute.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.real.avg = mean(pr.real),
-            se = sd(pr.real))
+            se = sd(pr.real)/ sqrt(length(pr.real)))
 
 ggplot(absolute.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se),col ="grey70", width= 2.5)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=pr.real, x=setTleaf), se = F, method="lm", col = "grey80")+
+  geom_smooth(se = F, method="lm", col = "grey80")+
   geom_point(col="grey30", size = 3, pch = 21, fill = "cornflowerblue", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
@@ -274,21 +275,18 @@ theme(axis.text.y = element_text(size = 15),
 dev.off()
 
 
-
 ### Plot showing Anet 21p over temp##-------------------------------###
+## Figure 1B ----
 
-svg(filename = "anet21-raw.svg", width = 16, height = 4.5, bg = "transparent")
-
+svg(filename = "anet21-raw-new.svg", width = 16, height = 4.5, bg = "transparent")
 
 anet.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(anet.21p.avg = mean(anet.21p),
-            se = sd(anet.21p))
-
+            se = sd(anet.21p) / sqrt(length(anet.21p)))
 
 ggplot(anet.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
-   #pmin can be used to cap the ymax. (e.g., pmin(anet.21p.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=anet.21p, x=setTleaf), se = F, method="lm", col = "grey80")+
+  geom_smooth(se = F, method="lm", col = "grey80")+
   geom_errorbar(aes(ymin=anet.21p.avg-se, ymax=anet.21p.avg+se),col ="grey70", width= 2.5) +
   geom_point(col="grey30", size = 3, pch = 21, fill = "limegreen", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=anet.21p, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
@@ -308,19 +306,19 @@ dev.off()
 
 
 ###Plot of pr.percent##-----------------------------------------###
-svg(filename = "pr-percent.svg", width = 16, height = 4.5, bg = "transparent")
+svg(filename = "pr-percent-new.svg", width = 16, height = 4.5, bg = "transparent")
 
 
 
 percent.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.percent.avg = mean(pr.percent),
-            se = sd(pr.percent))
+            se = sd(pr.percent)/ sqrt(length(pr.percent)))
 
 
 ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(data = outs, mapping = aes(y=pr.percent, x=setTleaf), se = F, method="lm", col = "grey80")+
+  geom_smooth(se = F, method="lm", col = "grey80")+
   # ggpmisc::stat_poly_eq(
   #   data = outs,
   #   formula = y ~ x,
@@ -334,13 +332,13 @@ ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7)+
-  scale_y_continuous(limits = c(0, 1.5), name = 
+  scale_y_continuous(limits = c(0, 1.3), name = 
                        expression(paste(italic(R)[p]/italic(A)[Net])))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base() +
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
-        panel.border = element_rect(color = "grey70"))
+        panel.border = element_rect(color = "grey70")) 
 dev.off()
 
 
@@ -348,6 +346,7 @@ dev.off()
 
 
 ###########
+
 outs$tl <- as.factor(outs$setTleaf)
 
 
@@ -484,11 +483,51 @@ mod5 <- nlme::lme(anet.21p ~  sp * setTleaf, data = outs,
 
 
 
+
+
+### plotting averages 
+
+pt <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(pr = mean(pr.real),
+            prse = sd(pr.real)/sqrt(length(pr.real)),
+            ps = mean(anet.21p),
+            psse = sd(anet.21p)/ sqrt(length(anet.21p)))
+
+
+
+
+svg(filename = "Rp-over-Anet-alltemp.svg", width = 10, height = 3.3, bg = "transparent")
+
+ggplot(pt, aes(y = pr, x=ps, color = sp)) +
+  geom_smooth(se = T, method="lm", col = "grey80") +
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
+  scale_x_continuous(limits = c(0, 20), 
+                     name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+  scale_y_continuous(limits = c(0,20), 
+                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+  ggthemes::theme_base() +
+  geom_errorbar(aes(ymin=pr-prse, ymax=pr+prse)) +
+  geom_errorbarh(aes(xmin=ps-psse, xmax=ps+psse)) + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2))+
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") + 
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
+  facet_wrap(~setTleaf)
+
+dev.off()
+
+
 # Does higher photorespiration rates = higher photosynthesis rates??? (spoiler, yes)
 
-svg(filename = "Rp-over-Anet.svg", width = 7, height = 4.5, bg = "transparent")
 
 
+#### all replicates plotted - donot use. 
+
+# svg(filename = "Rp-over-Anet.svg", width = 7, height = 4.5, bg = "transparent")
+outs$st <- as.factor(outs$setTleaf)
 ggplot(outs, aes(y = pr.real, x=anet.21p)) +
   geom_point(size = 3, 
              stroke = 0.85, aes(color = sp, shape = sp)) +
@@ -502,12 +541,14 @@ ggplot(outs, aes(y = pr.real, x=anet.21p)) +
         axis.text.x = element_text(size = 15),
         panel.border = element_rect(color = "grey70")) +
   scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
-  geom_abline(slope = 1, linetype = "dashed", color = "grey50")
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") 
 dev.off()
 
 #---------------------------------------------------------------------#
 
-svg(filename = "Rp-over-Anet-alltemp.svg", width = 16, height = 4.5, bg = "transparent")
+# svg(filename = "Rp-over-Anet-alltemp.svg", width = 16, height = 4.5, bg = "transparent")
+
+#### all replicates plotted - donot use. 
 
 
 ggplot(outs, aes(y = pr.real, x=anet.21p, color = sp)) +
