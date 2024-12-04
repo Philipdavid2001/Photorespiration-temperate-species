@@ -233,7 +233,7 @@ correct_RD(dflist, "./")
 ####### plotting output -------
 
 
-outs <- read.csv("species-output.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("output/species-output.csv", stringsAsFactors = T, sep = ";")
 
 outs$sp <- factor(outs$sp, levels = c(
   "Betula pendula",         
