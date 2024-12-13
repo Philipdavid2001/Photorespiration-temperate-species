@@ -639,6 +639,103 @@ mod7 <- nlme::lme(pr.real ~  anet.21p, data = outs35,
 
 
 
+#-------------------------------#
+
+
+### I WOULD LIKE TO DISCUSS THIS TO CONFIRM IM DOING THINGS CORRECTLY
+
+# Checking the individual significance of species temperature response.
+
+pt <- outs %>%
+  group_by(sp, treeid, setTleaf) %>%
+  summarise(pr = mean(pr.real),
+            prse = sd(pr.real)/sqrt(length(pr.real)),
+            ps = mean(anet.21p),
+            psse = sd(anet.21p)/ sqrt(length(anet.21p)))
+
+Betulapen <- subset(pt, sp == "Betula pendula")
+
+mod6 <- nlme::lme(pr ~  setTleaf, data = Betulapen, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Fagus <- subset(pt, sp == "Fagus sylvatica")
+
+mod6 <- nlme::lme(pr ~  setTleaf, data = Fagus, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Acer <- subset(pt, sp == "Acer platanoides")
+
+mod6 <- nlme::lme(pr ~  setTleaf, data = Acer, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Batulapub <- subset(pt, sp == "Betula pubescens")
+
+mod6 <- nlme::lme(pr ~  setTleaf, data = Batulapub, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Tilia <- subset(pt, sp == "Tilia cordata")
+
+mod6 <- nlme::lme(pr ~  setTleaf, data = Tilia, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Corylus <- subset(pt, sp == "Corylus avellana")
+
+mod6 <- nlme::lme(pr ~  setTleaf, data = Corylus, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Sorbus <- subset(pt, sp == "Scandosorbus intermedia")
+
+
+mod6 <- nlme::lme(pr ~  setTleaf, data = Sorbus, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+# Creating a sheet with each temperature point containing one compiled value for each species. This table is used when gathering the highest/lowest mean differences in Anet and Rp across Tleaf. 
+
+pt <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(pr = mean(pr.real),
+            prse = sd(pr.real)/sqrt(length(pr.real)),
+            ps = mean(anet.21p),
+            psse = sd(anet.21p)/ sqrt(length(anet.21p)))
+
+Sorbus <- subset(pt, sp == "Scandosorbus intermedia")
+
+
+mod6 <- nlme::lme(pr ~  setTleaf, data = Sorbus, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+
+
+
+
+
+
+
+
 
 
 
