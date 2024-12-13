@@ -1,18 +1,4 @@
-#install.packages("Hmisc", dependencies = T)
-#
-# if push fails
-# open the repository on terminal
-# run this command 
-# git config --global http.postBuffer 157286400
-# try pushing again
-# 
-# packages_to_load <- c("drc", "bbmle", "labelled", "MALDIquant", 
-#                      "magicfor", "ggplot2", "ggpubr", "ggpmisc", "tidyverse", #"broom", 
-#                     "Hmisc", "plotly", "PairedData", "DescTools", 
-#                     "generalhoslem", "graphics", "nls2", "plyr",
-#                     "ggthemes", "ggpubr", "signal", "segmented")
-#
-# lapply(packages_to_load, library, character.only = TRUE)
+
 
 ## lable ----
 ytleaf          <- expression("T"["leaf"]~degree~"C")
