@@ -19,13 +19,23 @@ labgs           <- expression(paste(italic(g[s])*" ("~mol[H[2]*O]~m^{-2}~s^{-1}~
 ## data processing ---- Load ONE of the following csv's
 
 
-# Species
+
+
+# Species #######################
 df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
-# Ecotypes
+
+
+# Ecotypes #####################
 
 df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-Birch-Ecotypes.csv", header = T, stringsAsFactors = T, sep = ";")
+
+
+
+
+
+
 
 
 ###### Photorespiration rate calculation loop -----------------------------------------------------
@@ -218,7 +228,6 @@ correct_RD(dflist, "./")
 
 ####### plotting output -------
 
-
 outs <- read.csv("output/species-output.csv", stringsAsFactors = T, sep = ";")
 
 outs$sp <- factor(outs$sp, levels = c(
@@ -333,6 +342,118 @@ ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
         panel.border = element_rect(color = "grey70")) 
 dev.off()
 
+
+##---------------------------------------------------------##
+
+
+###Plot of ambient gsw over temperature##-----------------------------------------###
+svg(filename = "gsw.21p-plot.svg", width = 16, height = 4.5, bg = "transparent")
+
+
+
+gsw.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(gsw.21p.avg = mean(gsw.21p),
+            se = sd(gsw.21p)/ sqrt(length(gsw.21p)))
+
+
+ggplot(gsw.table, aes(y = gsw.21p.avg, x=setTleaf, group=sp))+
+  #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(se = F, method="lm", col = "grey80")+
+  # ggpmisc::stat_poly_eq(
+  #   data = outs,
+  #   formula = y ~ x,
+  #   aes(x = setTleaf, y = gsw.21p, label = paste(after_stat(p.value.label), sep = "~~~")),
+  #   label.x = 22,
+  #   label.y = 1.5,
+  # )+
+  geom_errorbar(aes(ymin=gsw.21p.avg-se, ymax=gsw.21p.avg+se),col ="grey70", width= 2.5)+
+  geom_point(col="grey30", size = 3, pch = 21, fill = "limegreen", stroke = 0.85)+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp, ncol = 7)+
+  scale_y_continuous(limits = c(0, 0.5), name = 
+                       expression(paste(italic(gsw))))+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base() +
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) 
+dev.off()
+
+###Plot of O2-free gsw over temperature##-----------------------------------------###
+svg(filename = "gsw.0p-plot.svg", width = 16, height = 4.5, bg = "transparent")
+
+
+
+gswRp.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(gsw.0p.avg = mean(gsw.0p),
+            se = sd(gsw.0p)/ sqrt(length(gsw.0p)))
+
+
+ggplot(gswRp.table, aes(y = gsw.0p.avg, x=setTleaf, group=sp))+
+  #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(se = F, method="lm", col = "grey80")+
+  # ggpmisc::stat_poly_eq(
+  #   data = outs,
+  #   formula = y ~ x,
+  #   aes(x = setTleaf, y = gsw.0p, label = paste(after_stat(p.value.label), sep = "~~~")),
+  #   label.x = 22,
+  #   label.y = 1.5,
+  # )+
+  geom_errorbar(aes(ymin=gsw.0p.avg-se, ymax=gsw.0p.avg+se),col ="grey70", width= 2.5)+
+  geom_point(col="grey30", size = 3, pch = 21, fill = "cornflowerblue", stroke = 0.85)+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp, ncol = 7)+
+  scale_y_continuous(limits = c(0, 0.5), name = 
+                       expression(paste(italic(gsw))))+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base() +
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) 
+dev.off()
+
+
+###Plot of percentage change in ambient vs O2-free gsw over temperature##-----------------------------------------###
+svg(filename = "gsw.percent-plot.svg", width = 16, height = 4.5, bg = "transparent")
+
+
+
+gswpercent.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(gsw.percent.avg = mean(gsw.percent),
+            se = sd(gsw.percent)/ sqrt(length(gsw.percent)))
+
+
+ggplot(gswpercent.table, aes(y = gsw.percent.avg, x=setTleaf, group=sp))+
+  #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(se = F, method="lm", col = "grey80")+
+  # ggpmisc::stat_poly_eq(
+  #   data = outs,
+  #   formula = y ~ x,
+  #   aes(x = setTleaf, y = gsw.0p, label = paste(after_stat(p.value.label), sep = "~~~")),
+  #   label.x = 22,
+  #   label.y = 1.5,
+  # )+
+  geom_errorbar(aes(ymin=gsw.percent.avg-se, ymax=gsw.percent.avg+se),col ="grey70", width= 2.5)+
+  geom_point(col="grey30", size = 3, pch = 21, fill = "red3", stroke = 0.85)+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp, ncol = 7)+
+  scale_y_continuous(limits = c(-0.3, 0.7), name = 
+                       expression(paste(italic(gsw0p:gsw21p))))+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base() +
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) 
+dev.off()
 
 ##---------------------------------------------------------##
 
@@ -726,6 +847,31 @@ mod6 <- nlme::lme(pr ~  setTleaf, data = Sorbus,
                   random = ~1|treeid, 
                   method = "REML", 
                   na.action=na.omit) ; anova(mod6)
+
+
+-----#####Stomatal conductance for O2-free vs ambient across temperatures#---
+svg(filename = "gsw-ratio-split-temp.svg", width = 16, height = 4.5, bg = "transparent")
+
+#### all replicates plotted 
+
+
+ggplot(outs, aes(y = gsw.0p, x=gsw.21p, color = sp)) +
+  geom_smooth(data = outs, mapping = aes(y=gsw.0p, x=gsw.21p), 
+              se = T, method="lm", col = "grey80") +
+  geom_point(size = 3, 
+             stroke = 0.85, aes(color = sp, shape = sp)) +
+  scale_x_continuous(limits = c(0, 0.4), 
+                     name = expression(paste(italic(gsw)["21p"]))) +
+  scale_y_continuous(limits = c(0,0.4), 
+                     name = expression(paste(italic(gsw)["0p"])))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2))+
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") +
+  facet_wrap(~setTleaf)
+dev.off()
 
 
 
