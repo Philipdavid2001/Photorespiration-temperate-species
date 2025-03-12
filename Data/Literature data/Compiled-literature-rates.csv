@@ -1,0 +1,46 @@
+﻿Study;Method ;Species;JO;Rp;Qsat ;Φ ;SE;Tleaf (℃)
+;;;;(μ mol m–2 s–1);(μ mol m–2 s–1);;;
+Bernacchi et al., 2001;Anet-calculation;Tobacco (Nicotiana tabacum);;0.37;300;0.271;0.015;25
+;;;;;;;;
+Erel et al., 2015;ETR;Olive ;;;800;0.3;;25
+;partitioning;(Olea europaea);;;;;;
+Epron et al., 1995;ETR;European beech (Fagus sylvatica), Chestnut;26.9;;730;0.27;;25
+;partitioning;(Castanea sativa), French bean (Phaseolus vulgaris) & Sunflower;;;;;;
+;(In vivo);(Helianthus annuus);;;;;;
+Epron et al., 1995;ETR;European beech (Fagus sylvatica), Chestnut;40.8;;730;0.31;;25
+;partitioning;(Castanea sativa), French bean (Phaseolus vulgaris) & Sunflower;;;;;;
+;(In vivo);(Helianthus annuus);;;;;;
+Epron et al., 1995;ETR;European beech (Fagus sylvatica), Chestnut;79.79;;730;0.47;;25
+;partitioning;(Castanea sativa), French bean (Phaseolus vulgaris) & Sunflower;;;;;;
+;(In vivo);(Helianthus annuus);;;;;;
+Hochberg et al 2013;ETR partitioning;Grapevine, Vitis vinifera shiraz;;;;0.48;;25
+;;;;;;;;
+Hochberg et al 2013;ETR partitioning;Grapevine, Vitis vinifera cabernet sauvignon;;;;0.4;;25
+;;;;;;;;
+Huang et al., 2015;ETR partitioning;Arabidopsis thaliana;78;;;0.43;;25
+Keys et al., 1977;Anet-calculation;Wheat ;;2.25;;0.114;0.024;20.5
+;;(Triticum aestivum);;;;;;
+Laisk & Loreto 1996;ETR;Cowpea ;;;;;;
+;partitioning;(Vigna unguiculata);;;;;;
+Tomeo & Rosenthal 2018;Anet-calculation;Arabidopsis thaliana;;4.76;850;0.38;0.32;25
+;;;;;;;;
+Valentini et al., 1997;ETR ;Turkey oak (Quercus cerris, sept);29.32;;;0.827;0.079;
+;partitioning;;;;;;;
+Valentini et al., 1997;Anet-calculation;Turkey oak (Quercus cerris, sept);;3.14;;0.622;0.047;
+;;;;;;;;
+Ye et al., 2019;Anet-calculation;Wheat ;;11.82;1600;0.398;;30
+;;(Triticum aestivum ;;;;;;
+;;Z39-118);;;;;;
+Ye et al., 2019;Anet-calculation;Wheat ;;9.5;1600;0.32;;30
+;;(Triticum aestivum ;;;;;;
+;;Z39-118);;;;;;
+Yeo et al 1994;Anet-calculation;Rice, Oryza sativa;;8.6;800;0.312;;
+; ;;;;;;;
+Yeo et al 1994;Anet-calculation;Rice, Oryza australiensis;;10.6;800;0.372;;
+; ;;;;;;;
+Yeo et al 1994;Anet-calculation;Rice, Oryza rufipogon;;6.3;800;0.263;;
+; ;;;;;;;
+Zhang et al 2016;ETR ;Liana (Brideliya stipularis);49.47;;1500;0.497;;30
+;partitioning;;;;;;;
+Zhang et al 2016;ETR ;Liana (Strophioblachia fimbricalyx);25.26;;1500;0.513;;30
+;partitioning;;;;;;;

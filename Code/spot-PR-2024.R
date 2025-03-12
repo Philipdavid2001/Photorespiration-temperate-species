@@ -71,7 +71,9 @@ correct_RD <- function(data, output_path){
              "gsw.21p",    
              "gsw.0p",     
              "gsw.delta",  
-             "gsw.percent",
+             "gsw.percent", 
+             "Rh.21p", 
+             "Rh.21p", 
              "E.21p",     
              "E.0p",      
              "E.delta",   
@@ -135,6 +137,8 @@ correct_RD <- function(data, output_path){
     gsw.delta        <-      p0$gsw - p21$gsw
     gsw.percent      <-      gsw.delta/p21$gsw
     
+    Rh.21p           <-      p21$RHCham
+    Rh.0p            <-      p0$RHCham
     
     E.21p            <-      p21$E
     E.0p             <-      p0$E
@@ -177,6 +181,8 @@ correct_RD <- function(data, output_path){
                           gsw.0p,     
                           gsw.delta,  
                           gsw.percent,
+                          Rh.21p,
+                          Rh.0p,
                           p21$E,     
                           E.0p,      
                           E.delta,   
@@ -605,12 +611,20 @@ pt <- outs %>%
   summarise(pr = mean(pr.real),
             prse = sd(pr.real)/sqrt(length(pr.real)),
             ps = mean(anet.21p),
-            psse = sd(anet.21p)/ sqrt(length(anet.21p)))
+            psse = sd(anet.21p)/ sqrt(length(anet.21p)),
+            phi = mean(pr.percent),
+            phise = sd(pr.percent)/sqrt(length(pr.percent)))
+
 
 pt25 <- subset(pt, setTleaf == 25)
 pt30 <- subset(pt, setTleaf == 30)
 pt35 <- subset(pt, setTleaf == 35)
 
+pt25
+
+pt30
+
+pt35
 
 mod6 <- nlme::lme(pr ~  ps , data = pt25, 
                   random = ~1|sp, 
@@ -774,6 +788,9 @@ pt <- outs %>%
             ps = mean(anet.21p),
             psse = sd(anet.21p)/ sqrt(length(anet.21p)))
 
+
+###PHOTORESPIRATION RATES / TEMP
+
 Betulapen <- subset(pt, sp == "Betula pendula")
 
 mod6 <- nlme::lme(pr ~  setTleaf, data = Betulapen, 
@@ -826,6 +843,67 @@ Sorbus <- subset(pt, sp == "Scandosorbus intermedia")
 
 
 mod6 <- nlme::lme(pr ~  setTleaf, data = Sorbus, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+
+
+###PHOTOSYNTHESIS RATES / TEMP
+
+Betulapen <- subset(pt, sp == "Betula pendula")
+
+mod6 <- nlme::lme(ps ~  setTleaf, data = Betulapen, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Fagus <- subset(pt, sp == "Fagus sylvatica")
+
+mod6 <- nlme::lme(ps ~  setTleaf, data = Fagus, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Acer <- subset(pt, sp == "Acer platanoides")
+
+mod6 <- nlme::lme(ps ~  setTleaf, data = Acer, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Batulapub <- subset(pt, sp == "Betula pubescens")
+
+mod6 <- nlme::lme(ps ~  setTleaf, data = Batulapub, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Tilia <- subset(pt, sp == "Tilia cordata")
+
+mod6 <- nlme::lme(ps ~  setTleaf, data = Tilia, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Corylus <- subset(pt, sp == "Corylus avellana")
+
+mod6 <- nlme::lme(ps ~  setTleaf, data = Corylus, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6)
+
+
+Sorbus <- subset(pt, sp == "Scandosorbus intermedia")
+
+
+mod6 <- nlme::lme(ps ~  setTleaf, data = Sorbus, 
                   random = ~1|treeid, 
                   method = "REML", 
                   na.action=na.omit) ; anova(mod6)
