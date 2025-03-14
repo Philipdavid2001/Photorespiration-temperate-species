@@ -32,10 +32,10 @@ df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", 
 df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-Birch-Ecotypes.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
+#Bean!################
 
 
-
-
+df <- read.csv("Data/Coolbeans/BeansRP.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
 ###### Photorespiration rate calculation loop -----------------------------------------------------
@@ -211,7 +211,7 @@ correct_RD <- function(data, output_path){
     
   }
   
-  file_path = paste(output_path, "species-output.csv", sep = "/")
+  file_path = paste(output_path, "Beans-output.csv", sep = "/")
   if(!dir.exists(output_path)){
     dir.create(output_path, recursive = T)
   }
@@ -219,7 +219,7 @@ correct_RD <- function(data, output_path){
   
   index <- 1
   while(file.exists(file_path)){
-    file_path <- paste(output_path, paste("species-output", as.character(index), ".csv", sep =""), sep = "/")
+    file_path <- paste(output_path, paste("Beans-output", as.character(index), ".csv", sep =""), sep = "/")
     index = index + 1
   }
  
