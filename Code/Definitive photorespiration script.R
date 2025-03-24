@@ -32,8 +32,7 @@ df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", 
 df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-Birch-Ecotypes.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
-#Bean!################
-
+#Bean!################ This does not work and I don't know why yet
 
 df <- read.csv("Data/Coolbeans/BeansRP.csv", header = T, stringsAsFactors = T, sep = ";")
 
@@ -72,8 +71,6 @@ correct_RD <- function(data, output_path){
              "gsw.0p",     
              "gsw.delta",  
              "gsw.percent", 
-             "Rh.21p", 
-             "Rh.21p", 
              "E.21p",     
              "E.0p",      
              "E.delta",   
@@ -137,9 +134,6 @@ correct_RD <- function(data, output_path){
     gsw.delta        <-      p0$gsw - p21$gsw
     gsw.percent      <-      gsw.delta/p21$gsw
     
-    Rh.21p           <-      p21$RHCham
-    Rh.0p            <-      p0$RHCham
-    
     E.21p            <-      p21$E
     E.0p             <-      p0$E
     E.delta          <-      p0$E - p21$E
@@ -181,9 +175,7 @@ correct_RD <- function(data, output_path){
                           gsw.0p,     
                           gsw.delta,  
                           gsw.percent,
-                          Rh.21p,
-                          Rh.0p,
-                          p21$E,     
+                          E.21p,     
                           E.0p,      
                           E.delta,   
                           E.percent, 
@@ -274,7 +266,7 @@ ggplot(absolute.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7) +
   scale_y_continuous(limits = c(0, 15), name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  scale_x_continuous(limits = c(22,37), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base() +
 theme(axis.text.y = element_text(size = 15), 
       axis.text.x = element_text(size = 15),
@@ -341,7 +333,7 @@ ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
   facet_wrap(~sp, ncol = 7)+
   scale_y_continuous(limits = c(0, 1.3), name = 
                        expression(paste(italic(R)[p]/italic(A)[Net])))+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  scale_x_continuous(limits = c(22,37), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base() +
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
@@ -647,7 +639,6 @@ mod6 <- nlme::lme(pr ~  ps , data = pt35,
 cor25 <- cor(pt25$ps, pt25$pr, method = 'pearson'); round(cor25, 2) 
 cor30 <- cor(pt30$ps, pt30$pr, method = 'pearson'); round(cor30, 2)
 cor35 <- cor(pt35$ps, pt35$pr, method = 'pearson'); round(cor35, 2)
-
 
 
 
