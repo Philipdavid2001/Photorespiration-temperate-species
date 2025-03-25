@@ -308,7 +308,7 @@ ggplot(anet.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7) +
   scale_y_continuous(limits = c(0, 25), name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
-  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  scale_x_continuous(limits = c(22,37), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base()+
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
@@ -802,20 +802,28 @@ dev.off()
 
 
 
+
+
+#--------------------------------------------------------------------#
+
+###ETR analysis starts here
+
+
+
 ### Photorespiration ratio plotted over ratio of ETR used in each environment
 
-svg(filename = "Phi-ETR-percent-split.svg", width = 10, height = 3.3, bg = "transparent")
+svg(filename = "Phi-ETR.svg", width = 10, height = 3.3, bg = "transparent")
 
-ggplot(pt, aes(y = phi, x=(ETR.percent), color = sp)) +
+ggplot(pt, aes(y = ETR.percent, x=phi, color = sp)) +
   geom_smooth(se = T, method="lm", col = "grey80") +
   geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
-  scale_x_continuous(limits = c(-0.45, 0.3), 
-                     name = expression(ETRpercentage)) +
-  scale_y_continuous(limits = c(0,1), 
-                     name = expression(paste(Phi))) +
+  scale_x_continuous(limits = c(0, 1), 
+                     name = expression(Phi)) +
+  scale_y_continuous(limits = c(-0.45,0.3), 
+                     name = expression(paste(ETR.percent))) +
   ggthemes::theme_base() +
-  geom_errorbar(aes(ymin=phi-phise, ymax=phi+phise)) +
-  geom_errorbarh(aes(xmin=ETR.percent-ETR.percentse, xmax=ETR.percent+ETR.percentse)) + 
+  geom_errorbar(aes(ymin=ETR.21p-ETR.21pse, ymax=ETR.21p + ETR.21pse)) +
+  geom_errorbarh(aes(xmin=phi-phise, xmax=phi+phise)) + 
   theme(axis.text.y = element_text(size = 15),
         axis.text.x = element_text(size = 15),
         panel.border = element_rect(color = "grey70")) +
@@ -828,16 +836,16 @@ dev.off()
 
 
 
-svg(filename = "Phi-over-ETR.svg", width = 7, height = 4.5, bg = "transparent")
+svg(filename = "Anet-over-ETR.svg", width = 7, height = 4.5, bg = "transparent")
 outs$st <- as.factor(outs$setTleaf)
-ggplot(outs, aes(y = pr.real, x=ETR.delta)) +
+ggplot(outs, aes(y = anet.21p, x=ETR.21p)) +
   geom_point(size = 3, 
              stroke = 0.85, aes(color = sp, shape = sp)) +
   geom_smooth(se = T, method="lm", col = "grey50") +
-  scale_x_continuous(limits = c(-70, 25), 
-                     name = expression(paste(DeltaETR))) +
+  scale_x_continuous(limits = c(0, 200), 
+                     name = expression(paste(ETR))) +
   scale_y_continuous(limits = c(0,20), 
-                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+                     name = expression(paste(Anet)))+
   ggthemes::theme_base()+
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
@@ -848,11 +856,50 @@ dev.off()
 
 
 
+svg(filename = "Rp-over-ETR.svg", width = 7, height = 4.5, bg = "transparent")
+outs$st <- as.factor(outs$setTleaf)
+ggplot(outs, aes(y = pr.real, x=ETR.0p)) +
+  geom_point(size = 3, 
+             stroke = 0.85, aes(color = sp, shape = sp)) +
+  geom_smooth(se = T, method="lm", col = "grey50") +
+  scale_x_continuous(limits = c(0, 200), 
+                     name = expression(paste(ETR))) +
+  scale_y_continuous(limits = c(0,20), 
+                     name = expression(paste(Rp)))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") 
+dev.off()
 
-mod6 <- nlme::lme(pr.real ~  ETR.delta, data = outs, 
+
+
+svg(filename = "Phi-over-ETR.svg", width = 7, height = 4.5, bg = "transparent")
+outs$st <- as.factor(outs$setTleaf)
+ggplot(outs, aes(y = pr.percent, x=ETR.21p)) +
+  geom_point(size = 3, 
+             stroke = 0.85, aes(color = sp, shape = sp)) +
+  geom_smooth(se = T, method="lm", col = "grey50") +
+  scale_x_continuous(limits = c(0, 200), 
+                     name = expression(paste(ETR))) +
+  scale_y_continuous(limits = c(0,1), 
+                     name = expression(paste(Phi)))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") 
+dev.off()
+
+
+
+mod6 <- nlme::lme(ETR.percent ~  phi * setTleaf, data = pt, 
                   random = ~1|sp, 
                   method = "REML", 
-                  na.action=na.omit) ; anova(mod6) ### Nothing 0.26
+                  na.action=na.omit) ; anova(mod6) ### significant!
 
 mod6 <- nlme::lme(pr.real ~  ETR.percent, data = outs, 
                   random = ~1|sp, 
@@ -887,6 +934,10 @@ ggplot(outs, aes(y = pr.real, x=anet.21p)) +
 dev.off()
 
 #---------------------------------------------------------------------#
+
+
+
+
 
 # svg(filename = "Rp-over-Anet-alltemp.svg", width = 16, height = 4.5, bg = "transparent")
 
