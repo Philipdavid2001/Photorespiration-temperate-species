@@ -33,7 +33,11 @@ dev.off()
 
 setwd("C:/Users/Phili/Desktop/Github/Photorespiration-temperate-species/output")
 
+###Species
 df <- read.csv("species-output2.csv", header = T, stringsAsFactors = T, sep = ";")
+
+###Ecotypes
+df <- read.csv("ecotypes-output.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
 percent.table <- df %>%
@@ -52,7 +56,7 @@ ggplot(percent.table, aes(x = 1 , y=pr.percent.avg)) +
   scale_x_discrete(expand = c(0.5,0.5))+
   scale_y_continuous(limits = c(0,1))+
   scale_shape_manual(values = c(9,10,19,12,13,17,18))+
-  labs(x = "Temperate Tree species", y = "", color = "Species", shape = "Species")+
+  labs(x = "Temperate Tree Species", y = "", color = "Species", shape = "Species")+
   theme(legend.text = element_text(family = "serif", face = "italic", size = 10) )
 dev.off()
     

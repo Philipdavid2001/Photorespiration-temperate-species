@@ -228,6 +228,8 @@ correct_RD(dflist, "./")
 
 outs <- read.csv("output/species-output.csv", stringsAsFactors = T, sep = ";")
 
+
+###Species order
 outs$sp <- factor(outs$sp, levels = c(
   "Betula pendula",         
   "Fagus sylvatica",         
@@ -236,6 +238,19 @@ outs$sp <- factor(outs$sp, levels = c(
   "Tilia cordata",
   "Corylus avellana",       
   "Scandosorbus intermedia"))
+
+
+
+###Ecotype order
+outs$sp <- factor(outs$sp, levels = c(
+  "Docksta",         
+  "Dunker",         
+  "Nöbbele",       
+  "Rininngsholm", 
+  "Skellefteå",
+  "Uppsala",       
+  "Ystad"))
+
 
 
 
@@ -344,35 +359,35 @@ dev.off()
 ##---------------------------------------------------------##
 
 
-###Plot of ambient gsw over temperature##-----------------------------------------###
-svg(filename = "gsw.21p-plot.svg", width = 16, height = 4.5, bg = "transparent")
+###Plots of ETR over temperature##-----------------------------------------###
+svg(filename = "ETR.21p-plot.svg", width = 16, height = 4.5, bg = "transparent")
 
 
 
-gsw.table <- outs %>%
+ETR.table <- outs %>%
   group_by(sp, setTleaf) %>%
-  summarise(gsw.21p.avg = mean(gsw.21p),
-            se = sd(gsw.21p)/ sqrt(length(gsw.21p)))
+  summarise(ETR.21p.avg = mean(ETR.21p),
+            se = sd(ETR.21p)/ sqrt(length(ETR.21p)))
 
 
-ggplot(gsw.table, aes(y = gsw.21p.avg, x=setTleaf, group=sp))+
+ggplot(ETR.table, aes(y = ETR.21p.avg, x=setTleaf, group=sp))+
   #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
   geom_smooth(se = F, method="lm", col = "grey80")+
   # ggpmisc::stat_poly_eq(
   #   data = outs,
   #   formula = y ~ x,
-  #   aes(x = setTleaf, y = gsw.21p, label = paste(after_stat(p.value.label), sep = "~~~")),
+  #   aes(x = setTleaf, y = ETR.21p, label = paste(after_stat(p.value.label), sep = "~~~")),
   #   label.x = 22,
   #   label.y = 1.5,
   # )+
-  geom_errorbar(aes(ymin=gsw.21p.avg-se, ymax=gsw.21p.avg+se),col ="grey70", width= 2.5)+
+  geom_errorbar(aes(ymin=ETR.21p.avg-se, ymax=ETR.21p.avg+se),col ="grey70", width= 2.5)+
   geom_point(col="grey30", size = 3, pch = 21, fill = "limegreen", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7)+
-  scale_y_continuous(limits = c(0, 0.5), name = 
-                       expression(paste(italic(gsw))))+
+  scale_y_continuous(limits = c(0, 200), name = 
+                       expression(paste(ETR), ' (', mu * ~'mol'~ " photon"[2]~' m'^{-2}*' s'^{-1}*')'))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base() +
   theme(axis.text.y = element_text(size = 15), 
@@ -380,18 +395,18 @@ ggplot(gsw.table, aes(y = gsw.21p.avg, x=setTleaf, group=sp))+
         panel.border = element_rect(color = "grey70")) 
 dev.off()
 
-###Plot of O2-free gsw over temperature##-----------------------------------------###
-svg(filename = "gsw.0p-plot.svg", width = 16, height = 4.5, bg = "transparent")
+###Plot of O2-free ETR over temperature##-----------------------------------------###
+svg(filename = "ETR.0p-plot.svg", width = 16, height = 4.5, bg = "transparent")
 
 
 
-gswRp.table <- outs %>%
+ETRRp.table <- outs %>%
   group_by(sp, setTleaf) %>%
-  summarise(gsw.0p.avg = mean(gsw.0p),
-            se = sd(gsw.0p)/ sqrt(length(gsw.0p)))
+  summarise(ETR.0p.avg = mean(ETR.0p),
+            se = sd(ETR.0p)/ sqrt(length(ETR.0p)))
 
 
-ggplot(gswRp.table, aes(y = gsw.0p.avg, x=setTleaf, group=sp))+
+ggplot(ETRRp.table, aes(y = ETR.0p.avg, x=setTleaf, group=sp))+
   #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
   geom_smooth(se = F, method="lm", col = "grey80")+
   # ggpmisc::stat_poly_eq(
@@ -401,14 +416,14 @@ ggplot(gswRp.table, aes(y = gsw.0p.avg, x=setTleaf, group=sp))+
   #   label.x = 22,
   #   label.y = 1.5,
   # )+
-  geom_errorbar(aes(ymin=gsw.0p.avg-se, ymax=gsw.0p.avg+se),col ="grey70", width= 2.5)+
+  geom_errorbar(aes(ymin=ETR.0p.avg-se, ymax=ETR.0p.avg+se),col ="grey70", width= 2.5)+
   geom_point(col="grey30", size = 3, pch = 21, fill = "cornflowerblue", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7)+
-  scale_y_continuous(limits = c(0, 0.5), name = 
-                       expression(paste(italic(gsw))))+
+  scale_y_continuous(limits = c(0, 200), name = 
+                       expression(paste(ETR)))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base() +
   theme(axis.text.y = element_text(size = 15), 
@@ -418,40 +433,137 @@ dev.off()
 
 
 ###Plot of percentage change in ambient vs O2-free gsw over temperature##-----------------------------------------###
-svg(filename = "gsw.percent-plot.svg", width = 16, height = 4.5, bg = "transparent")
+svg(filename = "ETR.percent-plot.svg", width = 16, height = 4.5, bg = "transparent")
 
 
 
-gswpercent.table <- outs %>%
+ETRpercent.table <- outs %>%
   group_by(sp, setTleaf) %>%
-  summarise(gsw.percent.avg = mean(gsw.percent),
-            se = sd(gsw.percent)/ sqrt(length(gsw.percent)))
+  summarise(ETR.percent.avg = mean(ETR.percent),
+            se = sd(ETR.percent)/ sqrt(length(ETR.percent)))
 
 
-ggplot(gswpercent.table, aes(y = gsw.percent.avg, x=setTleaf, group=sp))+
+ggplot(ETRpercent.table, aes(y = ETR.percent.avg, x=setTleaf, group=sp))+
   #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
   geom_smooth(se = F, method="lm", col = "grey80")+
   # ggpmisc::stat_poly_eq(
   #   data = outs,
   #   formula = y ~ x,
-  #   aes(x = setTleaf, y = gsw.0p, label = paste(after_stat(p.value.label), sep = "~~~")),
+  #   aes(x = setTleaf, y = ETR.percent, label = paste(after_stat(p.value.label), sep = "~~~")),
   #   label.x = 22,
   #   label.y = 1.5,
   # )+
-  geom_errorbar(aes(ymin=gsw.percent.avg-se, ymax=gsw.percent.avg+se),col ="grey70", width= 2.5)+
+  geom_errorbar(aes(ymin=ETR.percent.avg-se, ymax=ETR.percent.avg+se),col ="grey70", width= 2.5)+
   geom_point(col="grey30", size = 3, pch = 21, fill = "red3", stroke = 0.85)+
   # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
   # formula = y~x,
   # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7)+
-  scale_y_continuous(limits = c(-0.3, 0.7), name = 
-                       expression(paste(italic(gsw0p:gsw21p))))+
+  scale_y_continuous(limits = c(-0.7, 0.7), name = 
+                       expression(ETR0p/ETR21p))+
   scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
   ggthemes::theme_base() +
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
         panel.border = element_rect(color = "grey70")) 
 dev.off()
+
+##---------------------------------------------------------##
+
+
+
+
+
+## Figure 1A ----
+svg(filename = "pr-raw-new.svg", width = 16, height = 4.5, bg = "transparent")
+absolute.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(pr.real.avg = mean(pr.real),
+            se = sd(pr.real)/ sqrt(length(pr.real)))
+
+ggplot(absolute.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
+  geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se),col ="grey70", width= 2.5)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(se = F, method="lm", col = "grey80")+
+  geom_point(col="grey30", size = 3, pch = 21, fill = "cornflowerblue", stroke = 0.85)+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp, ncol = 7) +
+  scale_y_continuous(limits = c(0, 15), name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  scale_x_continuous(limits = c(22,37), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base() +
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70"))
+dev.off()
+
+
+### Plot showing Anet 21p over temp##-------------------------------###
+## Figure 1B ----
+
+svg(filename = "anet21-raw-new.svg", width = 16, height = 4.5, bg = "transparent")
+
+anet.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(anet.21p.avg = mean(anet.21p),
+            se = sd(anet.21p) / sqrt(length(anet.21p)))
+
+ggplot(anet.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
+  geom_smooth(se = F, method="lm", col = "grey80")+
+  geom_errorbar(aes(ymin=anet.21p.avg-se, ymax=anet.21p.avg+se),col ="grey70", width= 2.5) +
+  geom_point(col="grey30", size = 3, pch = 21, fill = "limegreen", stroke = 0.85)+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=anet.21p, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp, ncol = 7) +
+  scale_y_continuous(limits = c(0, 25), name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  scale_x_continuous(limits = c(20,40), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70"))
+dev.off()
+
+
+
+
+
+###Plot of pr.percent##-----------------------------------------###
+svg(filename = "pr-percent-new.svg", width = 16, height = 4.5, bg = "transparent")
+
+
+
+percent.table <- outs %>%
+  group_by(sp, setTleaf) %>%
+  summarise(pr.percent.avg = mean(pr.percent),
+            se = sd(pr.percent)/ sqrt(length(pr.percent)))
+
+
+ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
+  #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
+  geom_smooth(se = F, method="lm", col = "grey80")+
+  # ggpmisc::stat_poly_eq(
+  #   data = outs,
+  #   formula = y ~ x,
+  #   aes(x = setTleaf, y = pr.percent, label = paste(after_stat(p.value.label), sep = "~~~")),
+  #   label.x = 22,
+  #   label.y = 1.5,
+  # )+
+  geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se),col ="grey70", width= 2.5)+
+  geom_point(col="grey30", size = 3, pch = 21, fill = "red3", stroke = 0.85)+
+  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
+  # formula = y~x,
+  # label.x =22, label.y = 1.5)+
+  facet_wrap(~sp, ncol = 7)+
+  scale_y_continuous(limits = c(0, 1.3), name = 
+                       expression(paste(italic(R)[p]/italic(A)[Net])))+
+  scale_x_continuous(limits = c(22,37), name = "Leaf Temperature (°C)")+
+  ggthemes::theme_base() +
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) 
+dev.off()
+
 
 ##---------------------------------------------------------##
 
@@ -605,7 +717,14 @@ pt <- outs %>%
             ps = mean(anet.21p),
             psse = sd(anet.21p)/ sqrt(length(anet.21p)),
             phi = mean(pr.percent),
-            phise = sd(pr.percent)/sqrt(length(pr.percent)))
+            phise = sd(pr.percent)/sqrt(length(pr.percent)),
+            ETR.0p = mean(ETR.0p),
+            ETR.0pse = sd(ETR.0p)/sqrt(length(ETR.0p)),
+            ETR.21p = mean(ETR.21p),
+            ETR.21pse = sd(ETR.21p)/ sqrt(length(ETR.21p)),
+            ETR.percent = mean(ETR.percent),
+            ETR.percentse = sd(ETR.percent)/sqrt(length(ETR.percent))
+            )
 
 
 pt25 <- subset(pt, setTleaf == 25)
@@ -653,6 +772,9 @@ mod6 <- nlme::lme(pr.real ~  anet.21p, data = outs,
 
 
 
+
+### Species Rp over Anet graph original
+
 svg(filename = "Rp-over-Anet-alltemp.svg", width = 10, height = 3.3, bg = "transparent")
 
 ggplot(pt, aes(y = pr, x=ps, color = sp)) +
@@ -676,13 +798,77 @@ ggplot(pt, aes(y = pr, x=ps, color = sp)) +
 dev.off()
 
 
+
+
+
+
+### Photorespiration ratio plotted over ratio of ETR used in each environment
+
+svg(filename = "Phi-ETR-percent-split.svg", width = 10, height = 3.3, bg = "transparent")
+
+ggplot(pt, aes(y = phi, x=(ETR.percent), color = sp)) +
+  geom_smooth(se = T, method="lm", col = "grey80") +
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
+  scale_x_continuous(limits = c(-0.45, 0.3), 
+                     name = expression(ETRpercentage)) +
+  scale_y_continuous(limits = c(0,1), 
+                     name = expression(paste(Phi))) +
+  ggthemes::theme_base() +
+  geom_errorbar(aes(ymin=phi-phise, ymax=phi+phise)) +
+  geom_errorbarh(aes(xmin=ETR.percent-ETR.percentse, xmax=ETR.percent+ETR.percentse)) + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2))+
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") + 
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
+  facet_wrap(~setTleaf)
+
+dev.off()
+
+
+
+svg(filename = "Phi-over-ETR.svg", width = 7, height = 4.5, bg = "transparent")
+outs$st <- as.factor(outs$setTleaf)
+ggplot(outs, aes(y = pr.real, x=ETR.delta)) +
+  geom_point(size = 3, 
+             stroke = 0.85, aes(color = sp, shape = sp)) +
+  geom_smooth(se = T, method="lm", col = "grey50") +
+  scale_x_continuous(limits = c(-70, 25), 
+                     name = expression(paste(DeltaETR))) +
+  scale_y_continuous(limits = c(0,20), 
+                     name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
+  ggthemes::theme_base()+
+  theme(axis.text.y = element_text(size = 15), 
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") 
+dev.off()
+
+
+
+
+mod6 <- nlme::lme(pr.real ~  ETR.delta, data = outs, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6) ### Nothing 0.26
+
+mod6 <- nlme::lme(pr.real ~  ETR.percent, data = outs, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod6) ### Nothing 0.76
+
+
+
+
 # Does higher photorespiration rates = higher photosynthesis rates??? (spoiler, yes)
 
 
 
 #### all replicates plotted - donot use. 
 
-# svg(filename = "Rp-over-Anet.svg", width = 7, height = 4.5, bg = "transparent")
+svg(filename = "Rp-over-Anet.svg", width = 7, height = 4.5, bg = "transparent")
 outs$st <- as.factor(outs$setTleaf)
 ggplot(outs, aes(y = pr.real, x=anet.21p)) +
   geom_point(size = 3, 
