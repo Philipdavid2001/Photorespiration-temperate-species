@@ -4,7 +4,7 @@ library(ggplot2)
 library(stats)
 library(base)
 library(dplyr)
-library(ggplot2)
+
 
 
 
@@ -12,6 +12,7 @@ library(ggplot2)
 df <- read.csv("Compiled-literature-rates.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
+df <- subset(df,tl2==1)
 
 
 svg("PR-lit.svg", width = 4.5, height = 4)
@@ -22,7 +23,7 @@ ggplot(df, aes(x = cat.1, y=phi, fill = duration)) +
                outlier.size=3, 
                outlier.alpha = 0.5) + theme_bw() +
   geom_point(size = 2, stroke = 0.85, aes(color = genus, shape = genus)) +
-  scale_shape_manual(values = c(0,1,2,3,4,5,6,7,8,14,15,16)) + ylim(0, 1) +
+  scale_shape_manual(values = c(0,1,2,3,4,5,6,7,8,14,15,16)) + ylim(0, 1) 
 dev.off()
 
 
@@ -31,7 +32,7 @@ dev.off()
 ###Our values
 
 
-setwd("C:/Users/Phili/Desktop/Github/Photorespiration-temperate-species/output")
+setwd("C:/Users/Phili/Desktop/Github/Photorespiration-temperate-species/Data/Literature data/Final Literature values")
 
 ###Species
 df <- read.csv("species-output2.csv", header = T, stringsAsFactors = T, sep = ";")
