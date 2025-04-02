@@ -48,6 +48,142 @@ adf <- read.csv("~/Documents/GitHub/Photorespiration-temperate-species/output/sp
 
 # adf <- subset(adf, ETR.delta >=-150)
 # adf <- subset(adf, pr.percent <=1.1)
+###
+
+  geom_point(size = 3, stroke = 0.85, aes(color = tleaf, shape = sp)) +
+adf$tlf <- as.factor(adf$tleaf)
+    
+ggplot(adf, aes(y = pr.percent, x=tlf)) +
+  scale_y_continuous(limits = c(0, 1.75), 
+                     name = expression(pr)) +
+  geom_boxplot(aes()) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2))+
+  ggthemes::theme_base() +
+  geom_smooth(se = T, method="lm", col = "grey80") +
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp)
+
+ggplot(adf, aes(y = pr.percent, x = tleaf)) +
+  scale_y_continuous(limits = c(0, 1.75), 
+                     name = expression(pr)) +
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), se = TRUE, method = "lm", color = "grey80") + # Smooth line
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp)
+
+
+
+ggplot(adf, aes(y = pr.percent, x = tleaf)) +
+  scale_y_continuous(limits = c(0, 1.75), 
+                     name = expression(pr)) +
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              se = TRUE, 
+              method = "lm", 
+              color = "grey0", 
+              fill = NA) +
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp)
+
+
+
+
+adf <- subset(adf,  sp != "Scandosorbus intermedia")
+
+
+adf$sp <- factor(adf$sp, levels = c("Betula pendula", 
+                                  "Fagus sylvatica","Betula pubescens", "Acer platanoides", "Tilia cordata", "Corylus avellana"))
+
+p3 <- ggplot(adf, aes(y = pr.percent, x = tleaf)) +
+  scale_y_continuous(limits = c(0, 1.75), 
+                     name = expression(phi == R[p] / A[net])) +
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(pr)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p3
+
+
+
+  
+  
+  
+
+p1 <- ggplot(adf, aes(y = anet.21p, x = tleaf)) +
+  scale_y_continuous(limits = c(0, 25), 
+                     name = expression(paste(A[net]*" ("~mu~mol~m^{-2}~s^{-1}~")"))) +
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(paste(T[leaf]~"("~degree~"C)"))) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p1
+
+
+
+
+
+p2 <- ggplot(adf, aes(y = pr, x = tleaf)) +
+  scale_y_continuous(limits = c(0, 25), 
+                     name = expression(paste(R[p]*" ("~mu~mol~m^{-2}~s^{-1}~")"))) +
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(tleaf)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p2
+
+
+###
+
+
+
+
+
+library(patchwork)
+combined_plot <- p1 / p2 / p3 
+svg(filename = "Temperate-PR-boxplot.svg", width = 10, height = 12, bg = "transparent")
+combined_plot
+dev.off()
+
+
+
+
+
+
+
 
 
 ggplot(adf, aes(y = ETR.delta, x=pr.percent, color = sp)) +
