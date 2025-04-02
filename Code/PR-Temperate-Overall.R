@@ -1,6 +1,9 @@
 library(dplyr)
 library(ggplot2)
 library(nlme)
+library(patchwork)
+
+
 setwd("~/Documents/GitHub/Photorespiration-temperate-species/Data/Literature data/Final Literature values")
 
 
@@ -45,13 +48,14 @@ ggplot(df, aes(x = pc , y=phi)) +
 adf <- read.csv("~/Documents/GitHub/Photorespiration-temperate-species/output/species-output-annotated.csv",
                 comment.char = "#" )
 
+adf$tlf <- as.factor(adf$tleaf)
+
 
 # adf <- subset(adf, ETR.delta >=-150)
 # adf <- subset(adf, pr.percent <=1.1)
 ###
 
   geom_point(size = 3, stroke = 0.85, aes(color = tleaf, shape = sp)) +
-adf$tlf <- as.factor(adf$tleaf)
     
 ggplot(adf, aes(y = pr.percent, x=tlf)) +
   scale_y_continuous(limits = c(0, 1.75), 
@@ -145,6 +149,23 @@ p1 <- ggplot(adf, aes(y = anet.21p, x = tleaf)) +
   facet_wrap(~sp, nrow = 1); p1
 
 
+p1b <- ggplot(adf, aes(y = anet.0p, x = tleaf)) +
+  scale_y_continuous(limits = c(0, 30), 
+                     name = expression(paste(A[net]*" ("~mu~mol~m^{-2}~s^{-1}~")"))) +
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(paste(T[leaf]~"("~degree~"C)"))) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p1b
+
 
 
 
@@ -172,11 +193,128 @@ p2 <- ggplot(adf, aes(y = pr, x = tleaf)) +
 
 
 
-library(patchwork)
 combined_plot <- p1 / p2 / p3 
 svg(filename = "Temperate-PR-boxplot.svg", width = 10, height = 12, bg = "transparent")
 combined_plot
 dev.off()
+
+combined_plot <- p1 / p1b / p2 
+svg(filename = "Temperate-PR-boxplot-anet.svg", width = 10, height = 12, bg = "transparent")
+combined_plot
+dev.off()
+
+
+
+
+p4 <- ggplot(adf, aes(y = -ETR.delta, x = tleaf)) +
+  scale_y_continuous(limits = c(-20, 100), 
+                     name = expression("|"~ETR[0*"%"] - ETR[21*"%"]~"|")) +
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(tleaf)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p4
+
+
+
+p5 <- ggplot(adf, aes(y = ETR.21p, x = tleaf)) +
+  scale_y_continuous(limits = c(-20, 250), 
+                     name =expression(ETR["21%"], ' (', mu * 'mol m'^{-2}*'s'^{-1}*')')) + 
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(tleaf)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p5
+
+
+
+
+
+
+p6 <- ggplot(adf, aes(y = ETR.0p, x = tleaf)) +
+  scale_y_continuous(limits = c(-20, 250), 
+                     name =expression(ETR["0%"], ' (', mu * 'mol m'^{-2}*'s'^{-1}*')')) + 
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(tleaf)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p6
+
+
+
+combined_plot <- p5 / p6 / p4 
+svg(filename = "Temperate-PR-ETR-boxplot.svg", width = 10, height = 12, bg = "transparent")
+combined_plot
+dev.off()
+
+
+
+
+p6 <- ggplot(adf, aes(y = gsw.21p, x = tleaf)) +
+  scale_y_continuous(limits = c(0, .8), 
+                     name =expression(g["s @21%"], ' (', mu * 'mol m'^{-2}*'s'^{-1}*')')) + 
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(tleaf)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p6
+
+
+
+
+
+p7 <- ggplot(adf, aes(y = gsw.0p, x = tleaf)) +
+  scale_y_continuous(limits = c(0, .8), 
+                     name =expression(g["s @0%"], ' (', mu * 'mol m'^{-2}*'s'^{-1}*')')) + 
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(tleaf)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p7
+
+
+
+
 
 
 
