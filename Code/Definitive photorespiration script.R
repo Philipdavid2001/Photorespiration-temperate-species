@@ -226,7 +226,7 @@ correct_RD(dflist, "./")
 
 ####### plotting output -------
 
-outs <- read.csv("output/species-output.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("output/ecotypes-output.csv", stringsAsFactors = T, sep = ";")
 
 
 ###Species order
@@ -245,9 +245,9 @@ outs$sp <- factor(outs$sp, levels = c(
 outs$sp <- factor(outs$sp, levels = c(
   "Docksta",         
   "Dunker",         
-  "Nöbbele",       
-  "Rininngsholm", 
-  "Skellefteå",
+  "Nobbele",       
+  "Ryninngsholm", 
+  "Skelleftea",
   "Uppsala",       
   "Ystad"))
 
@@ -1014,7 +1014,9 @@ pt <- outs %>%
   summarise(pr = mean(pr.real),
             prse = sd(pr.real)/sqrt(length(pr.real)),
             ps = mean(anet.21p),
-            psse = sd(anet.21p)/ sqrt(length(anet.21p)))
+            psse = sd(anet.21p)/ sqrt(length(anet.21p)),
+            phi = mean(pr.percent),
+            phise = sd(pr.percent)/sqrt(length(pr.percent)))
 
 
 ###PHOTORESPIRATION RATES / TEMP
