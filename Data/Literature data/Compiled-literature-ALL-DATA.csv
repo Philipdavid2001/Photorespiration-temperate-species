@@ -58,6 +58,15 @@ Ye et al. 2020;N2-method;Triticum aestivum;Triticum;Wheat;short;Annuals;15;;9.5;
 Hochberg et al 2013;ETR-partitioning;Vitis vinifera;Vitis;Vine;short;Annuals;16;;;;0.48;;25;1;shiraz;
 Hochberg et al 2013;ETR-partitioning;Vitis vinifera;Vitis;Vine;short;Annuals;17;;;;0.4;;25;1;cabernet sauvignon;
 Aliyev 2012;N2-method;Triticum aestivum ;Triticum;Wheat;short;Annuals;;;3.4;;0.3;;25;1;Azamatli-95;assumed 25C for Tleaf
-Aliyev 2013;N2-method;Triticum aestivum ;Triticum;Wheat;short;Annuals;;;2.33;;0.24;;25;1;Giymatli-2/17;assumed 25C for Tleaf
-Aliyev 2014;N2-method;Triticum aestivum ;Triticum;Wheat;short;Annuals;;;4.35;;0.3;;25;1;Gyrmyzy gul;assumed 25C for Tleaf
+Aliyev 2012;N2-method;Triticum aestivum ;Triticum;Wheat;short;Annuals;;;2.33;;0.24;;25;1;Giymatli-2/17;assumed 25C for Tleaf
+Aliyev 2012;N2-method;Triticum aestivum ;Triticum;Wheat;short;Annuals;;;4.35;;0.3;;25;1;Gyrmyzy gul;assumed 25C for Tleaf
 Cornic & Ghashghaie 1991;N2-method;Phaseolus vulgaris;Phaseolus;Bean;short;Annuals;;;2.985;1200;0.44223;;25;1;Three replicates (leaves) into one;
+Oberhauer & Edwards 1993;N2-method;Flaveria pringlei;Flaveria;Shrub;medium;Trees-literature;;;9.48;300;0.8556;;25;1;Varied CO2 between ambient and O2 free;O2 free = 800 ppm CO2
+Oberhauer & Edwards 1993;N2-method;Flaveria pringlei;Flaveria;Shrub;medium;Trees-literature;;;22.35;1100;0.99333;;25;1;;Ambient = 300 ppm CO2
+Sharkey 1985;N2-method;Pisum vulgaris;Pisum;Pea;short;Annuals;;;5.155;250;0.352699;0.0398423;25;1;Might not be saturated light?;Values for Sharkey 1985 taken from ci of 390 to 450
+Sharkey 1986;N2-method;Pisum vulgaris;Pisum;Pea;short;Annuals;;;1.9575;1000;0.079883;0.0282813;25;0;dont use this, this is weird;
+Villalobos-Gonzalez et al 2022;N2-method;Vitis vinifera;Vitis;Grape;short;Annuals;;;4.947;1250;0.624464;;28;0;Could be used, these values are calculated by me;Carmenere
+Villalobos-Gonzalez et al 2022;N2-method;Vitis vinifera;Vitis;Grape;short;Annuals;;;8.112;1250;0.828093;;28;0;;Chardonnay
+Villalobos-Gonzalez et al 2022;N2-method;Vitis vinifera;Vitis;Grape;short;Annuals;;;5.454;1250;0.455297;;28;0;;Cabernet sauvignon, very similar to the other studies values!!!! Cool
+Villalobos-Gonzalez et al 2022;N2-method;Vitis vinifera;Vitis;Grape;short;Annuals;;;5.775;1250;0.635244;;28;0;;Sauvignon blanc
+Takagi et al 2016;N2-method;Helianthus annus;Helianthus;Sunflower;short;Annuals;;;15.6255;500;0.998562;;25;1;Might be scewed, this is derived from one value;
