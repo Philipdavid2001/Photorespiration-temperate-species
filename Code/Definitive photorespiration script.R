@@ -226,7 +226,7 @@ correct_RD(dflist, "./")
 
 ####### plotting output -------
 
-outs <- read.csv("output/ecotypes-output.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("output/species-output.csv", stringsAsFactors = T, sep = ";")
 
 
 ###Species order
@@ -722,6 +722,8 @@ pt <- outs %>%
             ETR.0pse = sd(ETR.0p)/sqrt(length(ETR.0p)),
             ETR.21p = mean(ETR.21p),
             ETR.21pse = sd(ETR.21p)/ sqrt(length(ETR.21p)),
+            ETR.delta = mean((ETR.21p-ETR.0p)),
+            ETR.deltase = sd(ETR.delta)/sqrt(length(ETR.percent)),
             ETR.percent = mean(ETR.percent),
             ETR.percentse = sd(ETR.percent)/sqrt(length(ETR.percent))
             )
@@ -812,18 +814,18 @@ dev.off()
 
 ### Photorespiration ratio plotted over ratio of ETR used in each environment
 
-svg(filename = "Phi-ETR.svg", width = 10, height = 3.3, bg = "transparent")
+svg(filename = "Phi-ETRdelta.svg", width = 10, height = 3.3, bg = "transparent")
 
-ggplot(pt, aes(y = ETR.percent, x=phi, color = sp)) +
-  geom_smooth(se = T, method="lm", col = "grey80") +
+ggplot(pt, aes(y = ETR.delta, x=pr, color = sp)) +
+  geom_boxplot(aes(group = cut_width(setTleaf, 1))) +
   geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
-  scale_x_continuous(limits = c(0, 1), 
-                     name = expression(Phi)) +
-  scale_y_continuous(limits = c(-0.45,0.3), 
-                     name = expression(paste(ETR.percent))) +
+  scale_x_continuous(limits = c(0, 20), 
+                     name = expression(Rp)) +
+  scale_y_continuous(limits = c(0,65), 
+                     name = expression(paste(ETR.delta))) +
   ggthemes::theme_base() +
-  geom_errorbar(aes(ymin=ETR.21p-ETR.21pse, ymax=ETR.21p + ETR.21pse)) +
-  geom_errorbarh(aes(xmin=phi-phise, xmax=phi+phise)) + 
+  geom_errorbar(aes(ymin=ETR.delta-ETR.deltase, ymax=ETR.delta + ETR.deltase)) +
+  geom_errorbarh(aes(xmin=pr-prse, xmax=pr+prse)) + 
   theme(axis.text.y = element_text(size = 15),
         axis.text.x = element_text(size = 15),
         panel.border = element_rect(color = "grey70")) +
@@ -836,7 +838,54 @@ dev.off()
 
 
 
-svg(filename = "Anet-over-ETR.svg", width = 7, height = 4.5, bg = "transparent")
+#--------------------- test ETR over ETR
+svg(filename = "ETR.percent-over-Rp.svg", width = 7, height = 4.5, bg = "transparent")
+
+ggplot(pt, aes(y = ETR.percent, x=pr, color = sp)) +
+  geom_boxplot(aes(group = cut_width(setTleaf, 1))) +
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
+  scale_x_continuous(limits = c(0, 20), 
+                     name = expression(Rp)) +
+  scale_y_continuous(limits = c(-0.45,0.27), 
+                     name = expression(paste(ETR.percent))) +
+  ggthemes::theme_base() +
+  geom_errorbar(aes(ymin=ETR.percent-ETR.percentse, ymax=ETR.percent + ETR.percentse)) +
+  geom_errorbarh(aes(xmin=pr-prse, xmax=pr + prse)) + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2))+
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") + 
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
+  facet_wrap(~setTleaf)
+dev.off()
+
+
+svg(filename = "ETR.delta-over-temp.svg", width = 7, height = 4.5, bg = "transparent")
+
+ggplot(pt, aes(y = ETR.delta, x=phi, color = sp)) +
+  geom_boxplot(aes(group = cut_width(setTleaf, 1))) +
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
+  scale_x_continuous(limits = c(0, 1.2), 
+                     name = expression(Phi)) +
+  scale_y_continuous(limits = c(0,100), 
+                     name = expression(paste(ETR.percent))) +
+  ggthemes::theme_base() +
+  geom_errorbar(aes(ymin=ETR.delta-ETR.deltase, ymax=ETR.delta + ETR.deltase)) +
+  geom_errorbarh(aes(xmin=phi-phise, xmax=phi + phise)) + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2))+
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") + 
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
+  facet_wrap(~setTleaf)
+
+
+
+
+
+svg(filename = "ETR21p-over-ETR0p.svg", width = 7, height = 4.5, bg = "transparent")
 outs$st <- as.factor(outs$setTleaf)
 ggplot(outs, aes(y = anet.21p, x=ETR.21p)) +
   geom_point(size = 3, 
@@ -876,7 +925,7 @@ dev.off()
 
 
 
-svg(filename = "Phi-over-ETR.svg", width = 7, height = 4.5, bg = "transparent")
+svg(filename = "Phi-over-ETRdelta.svg", width = 7, height = 4.5, bg = "transparent")
 outs$st <- as.factor(outs$setTleaf)
 ggplot(outs, aes(y = pr.percent, x=ETR.21p)) +
   geom_point(size = 3, 
