@@ -4,10 +4,10 @@ library(nlme)
 library(patchwork)
 
 
-setwd("~/Documents/GitHub/Photorespiration-temperate-species/Data/Literature data/Final Literature values")
+setwd("C:/Users/Phili/Desktop/Github/Photorespiration-temperate-species/Data/Literature data")
 
 
-df <- read.csv("Compiled-literature-ALL-DATA.csv", stringsAsFactors = T, header = T)
+df <- read.csv("Compiled-literature-ALL-DATA.csv", stringsAsFactors = T, header = T, sep = ";")
 
 
 df <- subset(df, tleaf == 25)
@@ -31,14 +31,15 @@ ggplot(df, aes(x = pc , y=phi)) +
                  outlier.size=3, 
                  outlier.alpha = 1, fill = "white")+ theme_minimal() +
     geom_point(inherit.aes = F, size = 2, stroke = 0.85, aes(x = pc, y = phi, color = species, shape = species), position = position_dodge(width=0.5)) +
-    scale_y_continuous(limits = c(0,1))+
-    scale_shape_manual(values = c(9,10,19,12,13,17,18, 20,21,22,23,24,25, 8)) +
+    scale_y_continuous(limits = c(0,1.2))+
     labs(x = "", y = "Phi", color = "Species", shape = "Species")+
+  scale_shape_manual(values = c(9,10,19,12,13,17,18, 20,21,22,23,24,25,8,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20)) +
     theme(legend.text = element_text(family = "serif", face = "italic", size = 10) ) + coord_flip()
 
 --
     
     
+  
     mod4 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, 
                       random = ~1|treeid, 
                       method = "REML", 

@@ -41,7 +41,7 @@ df <- read.csv("species-output2.csv", header = T, stringsAsFactors = T, sep = ";
 df <- read.csv("ecotypes-output.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
-percent.table <- df %>%
+percent.table <- outs %>%
   group_by(sp, setTleaf) %>%
   summarise(pr.percent.avg = mean(pr.percent),
             se = sd(pr.percent)/ sqrt(length(pr.percent)))
