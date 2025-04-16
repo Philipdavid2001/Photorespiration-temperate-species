@@ -133,7 +133,7 @@ correct_RD <- function(data, output_path){
     ETR.0p           <-      p0$ETR
     ETR.delta        <-      p0$ETR - p21$ETR
     ETR.percent      <-      ETR.delta/p21$ETR
-    JT               <-      ETR.21p + ETR.0p
+    JT               <-      ETR.21p
     JO1              <-      pr.percent * JT
     JC1              <-      JT-JO1
     JO2              <-      ((2/3)*(JT-4*(anet.21p)))
