@@ -22,19 +22,7 @@ labgs           <- expression(paste(italic(g[s])*" ("~mol[H[2]*O]~m^{-2}~s^{-1}~
 
 
 # Species #######################
-df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
-
-
-
-
-# Ecotypes #####################
-
-df <- read.csv("Data/Uppsala-2024-Summer-Photorespiration-SpotMes-Birch-Ecotypes.csv", header = T, stringsAsFactors = T, sep = ";")
-
-
-#Bean!################ This does not work and I don't know why yet
-
-df <- read.csv("Data/Coolbeans/BeansRP.csv", header = T, stringsAsFactors = T, sep = ";")
+df <- read.csv("Data/Photorespiration temperate/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
 
 
 ###### Photorespiration rate calculation loop -----------------------------------------------------
@@ -84,9 +72,10 @@ correct_RD <- function(data, output_path){
              "JC1",
              "JO2",
              "JC2",
+             "Rp.ETR",
              "JO1.percent",
              "JC1.percent",
-             "JO2.percent",
+             "Rp.ETR.percent",
              "JC2.percent",
              "NPQ.21p",
              "NPQ.0p",
@@ -149,9 +138,10 @@ correct_RD <- function(data, output_path){
     JC1              <-      JT-JO1
     JO2              <-      ((2/3)*(JT-4*(anet.21p)))
     JC2              <-      ((1/3)*(JT+8*(anet.21p)))
+    Rp.ETR           <-      ((1/12)*(JT-4*(anet.21p)))
     JO1.percent      <-      JO1/JT
     JC1.percent      <-      JC1/JT
-    JO2.percent      <-      JO2/JT
+    Rp.ETR.percent   <-      Rp.ETR/JT
     JC2.percent      <-      JC2/JT
     
     
@@ -187,10 +177,11 @@ correct_RD <- function(data, output_path){
                           JO1,
                           JC1,
                           JO2,
+                          Rp.ETR,
                           JC2,
                           JO1.percent,
                           JC1.percent,
-                          JO2.percent,
+                          Rp.ETR.percent,
                           JC2.percent,
                           NPQ.21p,
                           NPQ.0p,
@@ -203,7 +194,7 @@ correct_RD <- function(data, output_path){
     
   }
   
-  file_path = paste(output_path, "Beans-output.csv", sep = "/")
+  file_path = paste(output_path, "Species-output.csv", sep = "/")
   if(!dir.exists(output_path)){
     dir.create(output_path, recursive = T)
   }
@@ -211,7 +202,7 @@ correct_RD <- function(data, output_path){
   
   index <- 1
   while(file.exists(file_path)){
-    file_path <- paste(output_path, paste("Beans-output", as.character(index), ".csv", sep =""), sep = "/")
+    file_path <- paste(output_path, paste("Species-output", as.character(index), ".csv", sep =""), sep = "/")
     index = index + 1
   }
  
@@ -226,7 +217,7 @@ correct_RD(dflist, "./")
 
 ####### plotting output -------
 
-outs <- read.csv("output/species-output.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("output/Species-output.csv", stringsAsFactors = T, sep = ";")
 
 
 ###Species order
@@ -861,25 +852,50 @@ ggplot(pt, aes(y = ETR.percent, x=pr, color = sp)) +
 dev.off()
 
 
-svg(filename = "ETR.delta-over-temp.svg", width = 7, height = 4.5, bg = "transparent")
+##Anet
 
-ggplot(pt, aes(y = ETR.delta, x=phi, color = sp)) +
+svg(filename = "ETR.21p-tleaf.svg", width = 7, height = 4.5, bg = "transparent")
+
+ggplot(pt, aes(y = ETR.21p, x=setTleaf, color = sp)) +
   geom_boxplot(aes(group = cut_width(setTleaf, 1))) +
   geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
-  scale_x_continuous(limits = c(0, 1.2), 
-                     name = expression(Phi)) +
-  scale_y_continuous(limits = c(0,100), 
-                     name = expression(paste(ETR.percent))) +
+  scale_x_continuous(limits = c(22.5,37.5), 
+                     name = expression(Anet.21p)) +
+  scale_y_continuous(limits = c(0,150), 
+                     name = expression(paste(ETR.21p))) +
   ggthemes::theme_base() +
-  geom_errorbar(aes(ymin=ETR.delta-ETR.deltase, ymax=ETR.delta + ETR.deltase)) +
-  geom_errorbarh(aes(xmin=phi-phise, xmax=phi + phise)) + 
+  geom_errorbar(aes(ymin=ETR.21p-ETR.21pse, ymax=ETR.21p + ETR.21pse)) +
+  geom_errorbarh(aes(xmin=ps-psse, xmax=ps + psse)) + 
   theme(axis.text.y = element_text(size = 15),
         axis.text.x = element_text(size = 15),
         panel.border = element_rect(color = "grey70")) +
   scale_shape_manual(values = c(21,22,23,24,25,1,2))+
   geom_abline(slope = 1, linetype = "dashed", color = "grey50") + 
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp))
+dev.off()
+
+###Rp
+
+svg(filename = "ETR.0p-tleaf.svg", width = 7, height = 4.5, bg = "transparent")
+ggplot(pt, aes(y = ETR.0p, x=setTleaf, color = sp)) +
+  geom_boxplot(aes(group = cut_width(setTleaf, 1))) +
   geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
-  facet_wrap(~setTleaf)
+  scale_x_continuous(limits = c(22.5, 37.5), 
+                     name = expression(Rp)) +
+  scale_y_continuous(limits = c(0,150), 
+                     name = expression(paste(ETR.0p))) +
+  ggthemes::theme_base() +
+  geom_errorbar(aes(ymin=ETR.0p-ETR.0pse, ymax=ETR.0p + ETR.0pse)) +
+  geom_errorbarh(aes(xmin=pr-prse, xmax=pr + prse)) + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  scale_shape_manual(values = c(21,22,23,24,25,1,2))+
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") + 
+  geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) 
+
+dev.off()
+
 
 
 
