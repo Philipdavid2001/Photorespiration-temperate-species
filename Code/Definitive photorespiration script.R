@@ -114,7 +114,10 @@ correct_RD <- function(data, output_path){
     
     
     anet.delta       <-      anet.0p - anet.21p
-    pr.CO2           <-      anet.delta * 0.5
+    ### uses default lambda |   pr.CO2           <-      anet.delta * 0.5
+    ## uses Walker 2017 temperature function for lambda
+    ## lambda = 0.389 + 0.00876  Tleaf 
+    pr.CO2           <-      anet.delta * (0.38926+(0.008765*setTleaf))
     pr.real          <-      anet.delta + pr.CO2
     pr.percent       <-      pr.real/anet.21p
     
@@ -217,7 +220,7 @@ correct_RD(dflist, "./")
 
 ####### plotting output -------
 
-outs <- read.csv("output/Species-output.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("Species-output.csv", stringsAsFactors = T, sep = ";")
 
 
 ###Species order
@@ -250,6 +253,7 @@ library(stats)
 library(base)
 library(dplyr)
 library(ggplot2)
+library(patchwork)
 
 
 
@@ -257,95 +261,108 @@ library(ggplot2)
 ## Plotting absolute Rp over temp##---------------------------------###
 
 ## Figure 1A ----
-svg(filename = "pr-raw-new.svg", width = 16, height = 4.5, bg = "transparent")
-absolute.table <- outs %>%
-  group_by(sp, setTleaf) %>%
-  summarise(pr.real.avg = mean(pr.real),
-            se = sd(pr.real)/ sqrt(length(pr.real)))
 
-ggplot(absolute.table, aes(y = pr.real.avg, x=setTleaf, group=sp))+
-  geom_errorbar(aes(ymin=pr.real.avg-se, ymax=pr.real.avg+se),col ="grey70", width= 2.5)+ #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(se = F, method="lm", col = "grey80")+
-  geom_point(col="grey30", size = 3, pch = 21, fill = "cornflowerblue", stroke = 0.85)+
-  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
-  # formula = y~x,
-  # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp, ncol = 7) +
-  scale_y_continuous(limits = c(0, 15), name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
-  scale_x_continuous(limits = c(22,37), name = "Leaf Temperature (°C)")+
+svg(filename = "pr-raw-new-5-6.svg", width = 8, height = 3, bg = "transparent")
+ggplot(outs, aes(x = setTleaf, y = pr.real)) + 
+  geom_boxplot(aes(group = factor(setTleaf)), fill = "deepskyblue", alpha = 0.5, 
+               outlier.colour = "blue", outlier.shape = 16) +
+  geom_smooth(method = "lm", col = "blue", se = FALSE) +  
+  scale_y_continuous(limits = c(0, 25), name = expression(paste(italic(A)[net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+  scale_x_continuous(limits = c(22, 37), name = "Leaf Temperature (°C)") +  
   ggthemes::theme_base() +
-theme(axis.text.y = element_text(size = 15), 
-      axis.text.x = element_text(size = 15),
-      panel.border = element_rect(color = "grey70"))
-dev.off()
-
-
-### Plot showing Anet 21p over temp##-------------------------------###
-## Figure 1B ----
-
-svg(filename = "anet21-raw-new.svg", width = 16, height = 4.5, bg = "transparent")
-
-anet.table <- outs %>%
-  group_by(sp, setTleaf) %>%
-  summarise(anet.21p.avg = mean(anet.21p),
-            se = sd(anet.21p) / sqrt(length(anet.21p)))
-
-ggplot(anet.table, aes(y = anet.21p.avg, x=setTleaf, group=sp))+
-  geom_smooth(se = F, method="lm", col = "grey80")+
-  geom_errorbar(aes(ymin=anet.21p.avg-se, ymax=anet.21p.avg+se),col ="grey70", width= 2.5) +
-  geom_point(col="grey30", size = 3, pch = 21, fill = "limegreen", stroke = 0.85)+
-  # stat_regline_equation(data = outs, aes(x = setTleaf, y=anet.21p, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
-  # formula = y~x,
-  # label.x =22, label.y = 1.5)+
   facet_wrap(~sp, ncol = 7) +
-  scale_y_continuous(limits = c(0, 25), name = expression(paste(italic(A)[Net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')')))+
-  scale_x_continuous(limits = c(22,37), name = "Leaf Temperature (°C)")+
-  ggthemes::theme_base()+
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
         panel.border = element_rect(color = "grey70"))
+
 dev.off()
 
+### boxplot version
 
-
-
+### Plot showing Anet 21p over temp##-------------------------------###
+## Figure 1B ----
+# 
+# svg(filename = "anet21-raw-new-5-6.svg", width = 8, height = 3, bg = "transparent")
+# ggplot(outs, aes(x = setTleaf, y = anet.21p)) + 
+#   geom_boxplot(aes(group = factor(setTleaf)), fill = "grey70", alpha = 0.5, 
+#                outlier.colour = "grey", outlier.shape = 16) +
+#   geom_smooth(method = "lm", col = "grey30", se = FALSE) +  
+#   scale_y_continuous(limits = c(0, 25), name = expression(paste(italic(A)[net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+#   scale_x_continuous(limits = c(22, 37), name = "Leaf temperature (°C)") +  
+#   ggthemes::theme_base() +
+#   facet_wrap(~sp, ncol = 7) +
+#   theme(axis.text.y = element_text(size = 15), 
+#         axis.text.x = element_text(size = 15),
+#         panel.border = element_rect(color = "grey70"))
+# dev.off()
 
 ###Plot of pr.percent##-----------------------------------------###
-svg(filename = "pr-percent-new.svg", width = 16, height = 4.5, bg = "transparent")
+# svg(filename = "pr-percent-new.svg", width = 8, height = 3, bg = "transparent")
+# ggplot(outs, aes(x = setTleaf, y = pr.percent)) + 
+#   geom_boxplot(aes(group = factor(setTleaf)), fill = "white", alpha = 0.5, 
+#                outlier.colour = "grey", outlier.shape = 16) +
+#   geom_smooth(method = "lm", col = "grey30", se = FALSE) +  
+#   scale_y_continuous(limits = c(0, 2), 
+#                      breaks = seq(0, 2, 1),  
+#                      name = expression(paste(italic(A)[net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+#   scale_x_continuous(limits = c(22, 37), name = "Leaf temperature (°C)") +  
+#   ggthemes::theme_base() +
+#   facet_wrap(~sp, ncol = 7) +
+#   theme(axis.text.y = element_text(size = 15), 
+#         axis.text.x = element_text(size = 15),
+#         panel.border = element_rect(color = "grey70"))
+# dev.off()
 
 
-
-percent.table <- outs %>%
-  group_by(sp, setTleaf) %>%
-  summarise(pr.percent.avg = mean(pr.percent),
-            se = sd(pr.percent)/ sqrt(length(pr.percent)))
+#### - combined main figure 1
 
 
-ggplot(percent.table, aes(y = pr.percent.avg, x=setTleaf, group=sp))+
-  #pmin can be used to cap the ymax. (e.g., pmin(pr.real.avg+se, 1.0))
-  geom_smooth(se = F, method="lm", col = "grey80")+
-  # ggpmisc::stat_poly_eq(
-  #   data = outs,
-  #   formula = y ~ x,
-  #   aes(x = setTleaf, y = pr.percent, label = paste(after_stat(p.value.label), sep = "~~~")),
-  #   label.x = 22,
-  #   label.y = 1.5,
-  # )+
-  geom_errorbar(aes(ymin=pr.percent.avg-se, ymax=pr.percent.avg+se),col ="grey70", width= 2.5)+
-  geom_point(col="grey30", size = 3, pch = 21, fill = "red3", stroke = 0.85)+
-  # stat_regline_equation(data = outs, aes(x = setTleaf, y=pr.real, label = paste(..eq.label.., ..adj.rr.label.., paste("p = ", ..p.value..), sep = "~~~")),
-  # formula = y~x,
-  # label.x =22, label.y = 1.5)+
-  facet_wrap(~sp, ncol = 7)+
-  scale_y_continuous(limits = c(0, 1.3), name = 
-                       expression(paste(italic(R)[p]/italic(A)[Net])))+
-  scale_x_continuous(limits = c(22,37), name = "Leaf Temperature (°C)")+
+plot1 <- ggplot(outs, aes(x = setTleaf, y = pr.real)) + 
+  geom_boxplot(aes(group = factor(setTleaf)), fill = "deepskyblue", alpha = 0.5, 
+               outlier.colour = "blue", outlier.shape = 16) +
+  geom_smooth(method = "lm", col = "blue", se = FALSE) +  
+  scale_y_continuous(limits = c(0, 25), name = expression(paste(italic(A)[net], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+  scale_x_continuous(limits = c(22, 37)) +  
   ggthemes::theme_base() +
+  facet_wrap(~sp, ncol = 7) +
+  theme(axis.text.x = element_blank(), axis.title.x = element_blank(),  # Hide x-axis labels
+        axis.text.y = element_text(size = 15), 
+        panel.border = element_rect(color = "grey70")); plot1
+
+plot2 <- ggplot(outs, aes(x = setTleaf, y = anet.21p)) + 
+  geom_boxplot(aes(group = factor(setTleaf)), fill = "grey70", alpha = 0.5, 
+               outlier.colour = "grey", outlier.shape = 16) +
+  geom_smooth(method = "lm", col = "grey30", se = FALSE) +  
+  scale_y_continuous(limits = c(0, 25), name = expression(paste(italic(R)[p], ' (', mu * ~'mol'~ " CO"[2]~' m'^{-2}*' s'^{-1}*')'))) +
+  scale_x_continuous(limits = c(22, 37)) +  
+  ggthemes::theme_base() +
+  facet_wrap(~sp, ncol = 7) +
+  theme(axis.text.x = element_blank(), axis.title.x = element_blank(),  # Hide x-axis labels
+        axis.text.y = element_text(size = 15), 
+        strip.text = element_blank(),
+        panel.border = element_rect(color = "grey70")); plot2
+
+plot3 <- ggplot(outs, aes(x = setTleaf, y = pr.percent)) + 
+  geom_boxplot(aes(group = factor(setTleaf)), fill = "white", alpha = 0.5, 
+               outlier.colour = "grey", outlier.shape = 16) +
+  geom_smooth(method = "lm", col = "grey30", se = FALSE) +  
+  scale_y_continuous(limits = c(0, 2), 
+                     breaks = seq(0, 2, 1),  
+                     name = expression(italic(R)[p] / italic(A)[net])) +
+  scale_x_continuous(limits = c(22, 37), name = "Leaf temperature (°C)") +  
+  ggthemes::theme_base() +
+  facet_wrap(~sp, ncol = 7) +
   theme(axis.text.y = element_text(size = 15), 
         axis.text.x = element_text(size = 15),
-        panel.border = element_rect(color = "grey70")) 
-dev.off()
+        strip.text = element_blank(),
+        panel.border = element_rect(color = "grey70")); plot3
 
+
+svg(filename = "Figure1-NEW.svg", width = 10, height = 10, bg = "transparent")
+
+(plot1 / plot2 / plot3) + plot_layout(nrow = 3)
+
+dev.off()
 
 ##---------------------------------------------------------##
 
