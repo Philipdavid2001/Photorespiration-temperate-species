@@ -2,13 +2,13 @@
 library(stats)
 library(base)
 library(dplyr)
-library(ggplot2)
 library(patchwork)
 library(lme4)
 library(dplyr)
 library(broom)
 library(tidyr)
 library(ggplot2)
+library(ggpubr)
 
 
 # Species #######################
@@ -30,7 +30,6 @@ dflist          <- dflist[sapply(dflist, nrow)>0]
 setwd("output")
 # tweak the code below for photorespiration rate calculation. 
 correct_RD <- function(data, output_path){
-  
   ColumnNames <- c("sp","treeid","setTleaf",
              "anet.21p",    
              "anet.0p",
@@ -95,7 +94,8 @@ correct_RD <- function(data, output_path){
     
     anet.delta       <-      anet.0p - anet.21p
     ## uses Walker 2017 temperature function for lambda
-    ## lambda = 0.389 + 0.00876  Tleaf ; to use default lambda: pr.CO2 <- anet.delta * 0.5
+    ## lambda = 0.389 + 0.00876  Tleaf 
+    ## to use default lambda: pr.CO2 <- anet.delta * 0.5
   
     pr.CO2           <-      anet.delta * (0.38926+(0.008765*setTleaf))
     pr.real          <-      anet.delta + pr.CO2
@@ -212,14 +212,14 @@ outs$sp <- factor(outs$sp, levels = c(
 
 
 ###Ecotype order
-outs$sp <- factor(outs$sp, levels = c(
-  "Docksta",         
-  "Dunker",         
-  "Nobbele",       
-  "Ryninngsholm", 
-  "Skelleftea",
-  "Uppsala",       
-  "Ystad"))
+# outs$sp <- factor(outs$sp, levels = c(
+#   "Docksta",         
+#   "Dunker",         
+#   "Nobbele",       
+#   "Ryninngsholm", 
+#   "Skelleftea",
+#   "Uppsala",       
+#   "Ystad"))
 
 
 
@@ -232,6 +232,24 @@ outs$sp <- factor(outs$sp, levels = c(
 
 ## Main Figure 1 ---------------------------------
 
+## plots updateds to add anova p value for each panel
+
+
+pval_df <- outs %>%
+  group_by(sp) %>%
+  filter(n_distinct(setTleaf) >= 2) %>%  # Ensure valid ANOVA
+  summarise(
+    pval = tryCatch({
+      summary(aov(anet.21p ~ factor(setTleaf)))[[1]][["Pr(>F)"]][1]
+    }, error = function(e) NA)
+  ) %>%
+  mutate(label = paste0("P = ", signif(pval, 3)))
+
+annot_df <- outs %>%
+  group_by(sp) %>%
+  summarise(ypos = max(anet.21p, na.rm = TRUE) + 1) %>%
+  left_join(pval_df, by = "sp")
+
 plot1 <- ggplot(outs, aes(x = setTleaf, y = anet.21p)) + 
   geom_boxplot(aes(group = factor(setTleaf)), fill = "#6666ff", alpha = .4, 
                outlier.colour = "blue", outlier.shape = 16) +
@@ -243,9 +261,32 @@ plot1 <- ggplot(outs, aes(x = setTleaf, y = anet.21p)) +
   scale_x_continuous(limits = c(22, 37)) +  
   ggthemes::theme_base() +
   facet_wrap(~sp, ncol = 7) +
-  theme(axis.text.x = element_blank(), axis.title.x = element_blank(),  # Hide x-axis labels
-        axis.text.y = element_text(size = 15), 
-        panel.border = element_rect(color = "grey70"));  plot1
+  theme(
+    axis.text.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.y = element_text(size = 15),
+    panel.border = element_rect(color = "grey70"),
+    plot.margin = margin(5, 5, 5, 5),
+    strip.text = element_blank()
+  ) +
+  geom_text(data = annot_df, aes(x = 30, y = 24, label = label), inherit.aes = FALSE, size = 5);  plot1
+
+
+pval_df <- outs %>%
+  group_by(sp) %>%
+  filter(n_distinct(setTleaf) >= 2) %>%  # Ensure valid ANOVA
+  summarise(
+    pval = tryCatch({
+      summary(aov(pr.real ~ factor(setTleaf)))[[1]][["Pr(>F)"]][1]
+    }, error = function(e) NA)
+  ) %>%
+  mutate(label = paste0("P = ", signif(pval, 3)))
+
+annot_df <- outs %>%
+  group_by(sp) %>%
+  summarise(ypos = max(pr.real, na.rm = TRUE) + 1) %>%
+  left_join(pval_df, by = "sp")
+
 
 plot2 <- ggplot(outs, aes(x = setTleaf, y = pr.real)) + 
   geom_boxplot(aes(group = factor(setTleaf)), fill = "#FF9900", alpha = 0.7, 
@@ -258,10 +299,30 @@ plot2 <- ggplot(outs, aes(x = setTleaf, y = pr.real)) +
   scale_x_continuous(limits = c(22, 37)) +  
   ggthemes::theme_base() +
   facet_wrap(~sp, ncol = 7) +
-  theme(axis.text.x = element_blank(), axis.title.x = element_blank(),  # Hide x-axis labels
-        axis.text.y = element_text(size = 15), 
-        strip.text = element_blank(),
-        panel.border = element_rect(color = "grey70")); plot2
+  theme(
+    axis.text.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.y = element_text(size = 15),
+    panel.border = element_rect(color = "grey70"),
+    strip.text = element_text(family = "Times New Roman", face = "italic", size = 13)
+  )  +
+  geom_text(data = annot_df, aes(x = 30, y = 24, label = label), inherit.aes = FALSE, size = 5); plot2
+
+pval_df <- outs %>%
+  group_by(sp) %>%
+  filter(n_distinct(setTleaf) >= 2) %>%  # Ensure valid ANOVA
+  summarise(
+    pval = tryCatch({
+      summary(aov(pr.percent ~ factor(setTleaf)))[[1]][["Pr(>F)"]][1]
+    }, error = function(e) NA)
+  ) %>%
+  mutate(label = paste0("P = ", signif(pval, 3)))
+
+annot_df <- outs %>%
+  group_by(sp) %>%
+  summarise(ypos = max(pr.percent, na.rm = TRUE) + 1) %>%
+  left_join(pval_df, by = "sp")
+
 
 plot3 <- ggplot(outs, aes(x = setTleaf, y = pr.percent)) + 
   geom_boxplot(aes(group = factor(setTleaf)), fill = "#FFFF99", alpha = 0.5, 
@@ -275,14 +336,17 @@ plot3 <- ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
   scale_x_continuous(limits = c(22, 37), name = "Leaf temperature (°C)") +  
   ggthemes::theme_base() +
   facet_wrap(~sp, ncol = 7) +
-  theme(axis.text.y = element_text(size = 15), 
-        axis.text.x = element_text(size = 15),
-        strip.text = element_blank(),
-        panel.border = element_rect(color = "grey70")); plot3
+  theme(
+    axis.text.y = element_text(size = 15),
+    axis.text.x = element_text(size = 15),
+    panel.border = element_rect(color = "grey70"),
+    strip.text = element_blank()
+  ) +
+  geom_text(data = annot_df, aes(x = 30, y = 2, label = label), inherit.aes = FALSE, size = 5); plot3
 
-svg(filename = "MAIN-Figure1.svg", width = 10, height = 10, bg = "transparent")
+svg(filename = "MAIN-Figure1a.svg", width = 10, height = 10, bg = "transparent")
 
-(plot1 / plot2 / plot3) + plot_layout(nrow = 3)
+(plot2 / plot1 / plot3) + plot_layout(nrow = 3)
 
 dev.off()
 
