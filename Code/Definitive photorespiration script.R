@@ -196,10 +196,10 @@ correct_RD(dflist, "./")
 
 ####### plotting output -------
 
-outs <- read.csv("Species-output.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("Species-output5.csv", stringsAsFactors = T, sep = ";")
 
 
-###Species order
+### Species order
 outs$sp <- factor(outs$sp, levels = c(
   "Betula pendula",         
   "Fagus sylvatica",         
@@ -227,7 +227,54 @@ outs$sp <- factor(outs$sp, levels = c(
 # Making the table for the concatenated PR values for each species and each temperature point.
 
 
+sdf <- outs %>%
+  group_by(sp, setTleaf) %>%                     
+  summarise(mean_pr_real = mean(pr.percent, na.rm = TRUE)) %>%  
+  arrange(sp, setTleaf)                          
 
+
+sdf <- subset(sdf, setTleaf == "35")
+
+lm_phi_tleaf <- lm(pr.percent ~ setTleaf, data = outs)
+
+summary(lm_phi_tleaf)
+
+
+ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue", fill = "lightblue") +
+  labs(
+       x = "Leaf Temperature (tleaf)",
+       y = "Phi") +
+  theme_minimal()
+
+geom_point(alpha = 0.6) +
+
+
+ggplot(outs, aes(x = setTleaf, y = pr.percent, color = sp)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) 
+
+lm_phi_tleaf <- lm(pr.percent ~ setTleaf, data = outs)
+
+lm_no_interaction <- lm(pr.percent ~ setTleaf + sp, data = outs)
+lm_interaction <- lm(pr.percent ~ setTleaf * sp, data = outs)
+summary(lm_no_interaction)
+anova(lm_no_interaction, lm_interaction)
+
+slope_table <- outs %>%
+  group_by(sp) %>%
+  do(tidy(lm(pr.percent ~ setTleaf, data = .))) %>%
+  filter(term == "setTleaf") %>%
+  select(sp, estimate, std.error, p.value) %>%
+  rename(slope = estimate, se = std.error) %>%
+  arrange(desc(abs(slope)))  
+
+mod_interaction <- lm(pr.percent ~ setTleaf * sp, data = outs)
+
+mod_main_effects <- lm(pr.percent ~ setTleaf + sp, data = outs)
+
+anova(mod_main_effects, mod_interaction)
 
 
 ## Main Figure 1 ---------------------------------
@@ -344,7 +391,7 @@ plot3 <- ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
   ) +
   geom_text(data = annot_df, aes(x = 30, y = 2, label = label), inherit.aes = FALSE, size = 5); plot3
 
-svg(filename = "MAIN-Figure1a.svg", width = 10, height = 10, bg = "transparent")
+svg(filename = "MAIN-Figure1c.svg", width = 10, height = 10, bg = "transparent")
 
 (plot2 / plot1 / plot3) + plot_layout(nrow = 3)
 
@@ -458,6 +505,7 @@ pt <- outs %>%
   )
 
 
+# come back here
 pt25 <- subset(outs, setTleaf == 25)
 pt30 <- subset(outs, setTleaf == 30)
 pt35 <- subset(outs, setTleaf == 35)
@@ -872,8 +920,6 @@ ggplot(outs, aes(y = pr.real, x=anet.21p, color = sp)) +
 
 dev.off()
 
-come here
-  
   
   ggplot(outs, aes(y = pr.real, x=setTleaf)) +
     geom_smooth(se = T, method="lm", col = "grey80") +
