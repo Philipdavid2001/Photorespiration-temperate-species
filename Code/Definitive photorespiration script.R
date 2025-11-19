@@ -3,12 +3,13 @@ library(stats)
 library(base)
 library(dplyr)
 library(patchwork)
-library(lme4)
-library(dplyr)
-library(broom)
 library(tidyr)
+library(lme4)
+library(broom)
 library(ggplot2)
 library(ggpubr)
+library(purrr)
+
 
 
 # Species #######################
@@ -84,7 +85,7 @@ correct_RD <- function(data, output_path){
     anet.21p         <-     p21$A
     anet.0p          <-     p0$A
      
-    
+
     # Correcting for dark respiration - NOT DONE
     # Since we assume mitochondrial respiration under ambient and non-photorespiratory conditions are assumed constant - we will not correct for Rd. hence, this part of the code is ignored. 
     # In case used: The values for slope and intercept calculated using literature values. 
@@ -94,7 +95,7 @@ correct_RD <- function(data, output_path){
     
     anet.delta       <-      anet.0p - anet.21p
     ## uses Walker 2017 temperature function for lambda
-    ## lambda = 0.389 + 0.00876  Tleaf 
+    ## lambda = 0.389 + 0.00876 x Tleaf 
     ## to use default lambda: pr.CO2 <- anet.delta * 0.5
   
     pr.CO2           <-      anet.delta * (0.38926+(0.008765*setTleaf))
@@ -195,8 +196,13 @@ correct_RD(dflist, "./")
 
 
 ####### plotting output -------
+setwd("output")
 
-outs <- read.csv("Species-output5.csv", stringsAsFactors = T, sep = ";")
+outs <- read.csv("Species-output-with-sla.csv", stringsAsFactors = T, sep = ",")
+# SLA data from GIFT database 
+# Denelle, Pierre, Patrick Weigelt, and Holger Kreft. 2023. “GIFT—An R Package to Access the Global Inventory of Floras and Traits.” Methods in Ecology and Evolution 14 (11): 2738–48.
+# Weigelt, Patrick, Christian König, and Holger Kreft. 2020. “GIFT – A Global Inventory of Floras and Traits for Macroecology and Biogeography.” Journal of Biogeography 47 (1): 16–43.
+
 
 
 ### Species order
@@ -222,9 +228,16 @@ outs$sp <- factor(outs$sp, levels = c(
 #   "Ystad"))
 
 
-
-
 # Making the table for the concatenated PR values for each species and each temperature point.
+
+
+
+mod4 <- nlme::lme(pr.real ~  sp, data = outs, 
+                  random = ~1|treeid, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod4)
+
+
 
 
 sdf <- outs %>%
@@ -233,13 +246,12 @@ sdf <- outs %>%
   arrange(sp, setTleaf)                          
 
 
-sdf <- subset(sdf, setTleaf == "35")
+# sdf <- subset(sdf, setTleaf == "35")
 
 lm_phi_tleaf <- lm(pr.percent ~ setTleaf, data = outs)
-
 summary(lm_phi_tleaf)
 
-
+# diagnostic misc plots
 ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", se = TRUE, color = "blue", fill = "lightblue") +
@@ -248,27 +260,195 @@ ggplot(outs, aes(x = setTleaf, y = pr.percent)) +
        y = "Phi") +
   theme_minimal()
 
-geom_point(alpha = 0.6) +
-
-
 ggplot(outs, aes(x = setTleaf, y = pr.percent, color = sp)) +
-  geom_point(alpha = 0.6) +
+  geom_point(alpha = 0.006) +
   geom_smooth(method = "lm", se = FALSE) 
 
-lm_phi_tleaf <- lm(pr.percent ~ setTleaf, data = outs)
 
 lm_no_interaction <- lm(pr.percent ~ setTleaf + sp, data = outs)
 lm_interaction <- lm(pr.percent ~ setTleaf * sp, data = outs)
 summary(lm_no_interaction)
 anova(lm_no_interaction, lm_interaction)
 
-slope_table <- outs %>%
+prslp <- outs %>%
   group_by(sp) %>%
   do(tidy(lm(pr.percent ~ setTleaf, data = .))) %>%
   filter(term == "setTleaf") %>%
-  select(sp, estimate, std.error, p.value) %>%
+  dplyr::select(sp, estimate, std.error, p.value) %>%
   rename(slope = estimate, se = std.error) %>%
   arrange(desc(abs(slope)))  
+
+anetslp <- outs %>%
+  group_by(sp) %>%
+  do(tidy(lm(anet.21p ~ setTleaf, data = .))) %>%
+  filter(term == "setTleaf") %>%
+  dplyr::select(sp, estimate, std.error, p.value) %>%
+  rename(slope = estimate, se = std.error) %>%
+  arrange(desc(abs(slope)))  
+
+
+
+# Combine by species
+combined_slopes <- left_join(prslp, anetslp, by = "sp")
+
+sla_data <- tribble(
+  ~sp, ~sla,
+  "Betula pubescens",        144,
+  "Scandosorbus intermedia", 157,
+  "Fagus sylvatica",         174,
+  "Betula pendula",          179,
+  "Corylus avellana",        194,
+  "Acer platanoides",        197,
+  "Tilia cordata",           272
+) # data from GIFT
+
+cdb <- combined_slopes %>%
+  left_join(sla_data, by = "sp")
+
+
+cdb$sp <- as.factor(cdb$sp)
+
+mod4 <- nlme::lme(pr_slope ~  sla, data = cdb, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod4)
+
+mod4 <- nlme::lme(anet_slope ~  sla, data = cdb, 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod4)
+
+
+plot(anet_slope ~  sla, data = cdb)
+plot(pr_slope ~  sla, data = cdb)
+
+plot(pr_slope ~  sla, data = subset(cdb, sla < 250))
+
+cc <- subset(cdb, sp != "Scandosorbus intermedia")
+
+mod4 <- nlme::lme(pr_slope ~  sla, data = subset(cdb, sla < 210), 
+                  random = ~1|sp, 
+                  method = "REML", 
+                  na.action=na.omit) ; anova(mod4)
+
+
+
+anova(lm(pr_slope ~  sla, data = subset(cdb, sla < 210)))
+cor.test(~ pr_slope + sla, data = subset(cdb, sla < 210))
+
+# Pearsons R = 0.882, P = 0.019 
+
+anova(lm(pr_slope ~  sla, data = subset(cdb, sla < 2100)))
+cor.test(~ pr_slope + sla, data = subset(cdb, sla < 2100))
+# Pearsons R = 0.138, P = 0.76 
+# the relationship does not show up if we include Tilia cordata which has the highest SLA of 272
+
+anova(lm(anet_p ~  sla, data = subset(cdb, sla < 210)))
+cor.test(~ anet_p + sla, data = subset(cdb, sla < 210))
+anova(lm(anet_p ~  sla, data = subset(cdb, sla < 2100)))
+cor.test(~ anet_p + sla, data = subset(cdb, sla < 2100))
+# 
+# No relationship with slope of Anet
+
+anova(lm(pr.real ~  sla, data = subset(outs, sla < 2100)))
+cor.test(~ pr.real + sla, data = subset(outs, sla < 2100))
+# Pearsons R = -0.21, P = 0.012 
+
+anova(lm(pr.real ~  sla, data = subset(outs, sla < 210)))
+cor.test(~ pr.real + sla, data = subset(outs, sla < 210))
+# the relationship weakens if we exclude Tilia cordata which has the highest SLA of 272
+
+
+anova(lm(anet.21p ~  sla, data = subset(outs, sla < 2100)))
+cor.test(~ anet.21p + sla, data = subset(outs, sla < 2100))
+# Pearsons R = -0.235, P = 0.0061 
+
+anova(lm(anet.21p ~  sla, data = subset(outs, sla < 210)))
+cor.test(~ anet.21p + sla, data = subset(outs, sla < 210))
+# the relationship weakens if we exclude Tilia cordata which has the highest SLA of 272
+
+ggplot(outs, aes(x = sla, y = pr.real)) +
+  geom_point(alpha = 0.6, color = "black", size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue", linewidth = 1) +
+  labs(
+    x = "SLA (cm²/g)",
+    y = "Anet (21p)",
+    title = "Scatterplot of Anet vs SLA with Linear Fit"
+  ) +
+  theme_minimal(base_size = 14)
+
+cor_val <- cor(outs$sla, outs$pr.real, use = "complete.obs")
+
+ggplot(outs, aes(x = sla, y = pr.real, color = setTleaf)) +
+  geom_point(alpha = 0.6,  size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue", linewidth = 1) +
+  annotate("text", x = max(outs$sla) * 0.8, y = max(outs$anet.21p), 
+           label = paste0("r = ", round(cor_val, 3)), size = 5, color = "darkred") +
+  labs(
+    x = "SLA (cm²/g)",
+    y = "Anet (21p)"
+  ) +
+  theme_bw(base_size = 14)
+
+outs <- outs %>%
+  mutate(setTleaf = factor(setTleaf, levels = c(25, 30, 35), labels = c("Low", "Medium", "High")))
+
+
+ggplot(outs, aes(x = sla, y = pr.real, color = setTleaf)) +
+  geom_point(alpha = 0.5, size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue", linewidth = 1) +
+  annotate("text", x = max(outs$sla) * 0.8, y = max(outs$pr.real), 
+           label = paste0("r = ", round(cor_val, 3)), size = 5, color = "darkred") +
+  scale_color_manual(values = c("blue", "grey20", "orange")) +
+  labs(
+    x = "SLA (cm²/g)",
+    y = "Anet (21p)",
+    color = "Leaf Temp"
+  ) + facet_wrap(~setTleaf) +
+  theme_bw(base_size = 14)
+
+
+# Step 1: Compute r and slope per group
+labels_df <- outs %>%
+  group_by(setTleaf) %>%
+  summarise(
+    r = cor(sla, pr.real, use = "complete.obs"),
+    lm_fit = list(lm(pr.real ~ sla)),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    slope = sapply(lm_fit, function(mod) coef(mod)[2]),
+    pval = sapply(lm_fit, function(mod) summary(mod)$coefficients[2, 4]),
+    label = paste0(
+      "r = ", round(r, 2),
+      "\nslope = ", round(slope, 3),
+      "\np = ", format.pval(pval, digits = 2, eps = 0.001)
+    ),
+    x = max(outs$sla) * 0.7,
+    y = max(outs$pr.real) * 0.9
+  )
+
+ggplot(outs, aes(x = sla, y = pr.real, color = setTleaf)) +
+  geom_point(alpha = 0.5, size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue", linewidth = 1) +
+  geom_text(data = labels_df, aes(x = x, y = y, label = label), inherit.aes = FALSE, size = 5, color = "darkred") +
+  scale_color_manual(values = c("blue", "grey20", "orange")) +
+  labs(
+    x = "SLA (cm²/g)",
+    y = "Anet (21p)",
+    color = "Leaf Temp"
+  ) +
+  facet_wrap(~setTleaf) +
+  theme_bw(base_size = 14)
+
+# interaction model
+interaction_model <- lm(pr.real ~ sla * setTleaf, data = outs)
+summary(interaction_model)
+
+
+
+
+
 
 mod_interaction <- lm(pr.percent ~ setTleaf * sp, data = outs)
 
@@ -482,6 +662,10 @@ mod4 <- nlme::lme(pr.real ~   anet.21p * setTleaf * sp, data = outs,
                   method = "REML", 
                   na.action=na.omit) ; anova(mod4)
 
+
+outs
+
+
 anova(mod4, mod4a)
 
 ### plotting averages ----
@@ -505,7 +689,6 @@ pt <- outs %>%
   )
 
 
-# come back here
 pt25 <- subset(outs, setTleaf == 25)
 pt30 <- subset(outs, setTleaf == 30)
 pt35 <- subset(outs, setTleaf == 35)
@@ -970,7 +1153,7 @@ dev.off()
 
 #--------------------------------------------------------------------#
 
-###ETR analysis starts here
+### ETR analysis starts here
 
 
 
@@ -1143,10 +1326,7 @@ mod6 <- nlme::lme(pr.real ~  ETR.percent, data = outs,
                   na.action=na.omit) ; anova(mod6) ### Nothing 0.76
 
 
-
-
 # Does higher photorespiration rates = higher photosynthesis rates??? (spoiler, yes)
-
 
 
 #### all replicates plotted - donot use. 
@@ -1239,9 +1419,6 @@ mod7 <- nlme::lme(pr.real ~  anet.21p, data = outs35,
 
 
 #-------------------------------#
-
-
-### I WOULD LIKE TO DISCUSS THIS TO CONFIRM IM DOING THINGS CORRECTLY
 
 # Checking the individual significance of species temperature response.
 

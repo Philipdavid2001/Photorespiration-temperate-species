@@ -1,53 +1,137 @@
 library(dplyr)
 library(ggplot2)
+library(multcompView)
 library(nlme)
 library(patchwork)
+library(ggpubr)
 
 
 setwd("C:/Users/Phili/Desktop/Github/Photorespiration-temperate-species/Data/Literature data")
 
 
-df <- read.csv("Compiled-literature-ALL-DATA.csv", stringsAsFactors = T, header = T, sep = ";")
+outs <- read.csv("Species-output-with-sla.csv", stringsAsFactors = T, header = T, sep = ",")
+
+## mixed effects model fit used in Table S5 ----
+
+## set 1 photosynthesis rate models----
+m1 <- nlme::lme(anet.21p ~  sp, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m1)
+
+m2 <- nlme::lme(anet.21p ~  setTleaf, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m2)
+
+m3 <- nlme::lme(anet.21p ~  sp * setTleaf, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m3)
+
+## set 2 photorespiration rate models ----
+
+m4 <- nlme::lme(pr.real ~  sp, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m4)
+
+m5 <- nlme::lme(pr.real ~  setTleaf, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m5)
+
+m6 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m6)
 
 
-df <- subset(df, tleaf == 25)
+m7 <- nlme::lme(pr.real ~  anet.21p, data = outs, 
+                random = ~1|sp, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m7)
+
+m8 <- nlme::lme(pr.real ~  anet.21p * setTleaf , data = outs, 
+                random = ~1|sp, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m8)
+
+## phi models
 
 
-boxplot(df$phi ~ df$duration)
+m9 <- nlme::lme(pr.percent ~  sp, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m9)
 
-boxplot(df$phi ~ df$pc)
+m10 <- nlme::lme(pr.percent ~  setTleaf, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m10)
 
-percent.table <- df %>%
-    group_by(pc) %>%
-    summarise(pr.percent.avg = mean(phi),
-              se = sd(phi)/ sqrt(length(phi)))
+m11 <- nlme::lme(pr.percent ~  sp * setTleaf, data = outs, 
+                random = ~1|treeid, 
+                method = "REML", 
+                na.action=na.omit) ; anova(m11)
 
+# table compilation from the above model fits - need to work on this. the function still does not work
 
+models <- list(
+  m1 = m1, m2 = m2, m3 = m3,
+  m4 = m4, m5 = m5, m6 = m6,
+  m7 = m7, m8 = m8,
+  m9 = m9, m10 = m10, m11 = m11
+)
 
-ggplot(df, aes(x = pc , y=phi)) + 
-    geom_boxplot(aes(x = pc, y=phi), 
-                 outlier.colour="darkred", 
-                 outlier.shape=21,
-                 outlier.size=3, 
-                 outlier.alpha = 1, fill = "white")+ theme_minimal() +
-    geom_point(inherit.aes = F, size = 2, stroke = 0.85, aes(x = pc, y = phi, color = species, shape = species), position = position_dodge(width=0.5)) +
-    scale_y_continuous(limits = c(0,1.2))+
-    labs(x = "", y = "Phi", color = "Species", shape = "Species")+
-  scale_shape_manual(values = c(9,10,19,12,13,17,18, 20,21,22,23,24,25,8,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20)) +
-    theme(legend.text = element_text(family = "serif", face = "italic", size = 10) ) + coord_flip()
-
---
-    
-    
+extract_model_info <- function(model, response_name) {
+  a <- tryCatch(anova(model), error = function(e) return(NULL))
+  if (is.null(a) || nrow(a) == 0) return(NULL)
   
-    mod4 <- nlme::lme(pr.real ~  sp * setTleaf, data = outs, 
-                      random = ~1|treeid, 
-                      method = "REML", 
-                      na.action=na.omit) ; anova(mod4)
+  terms <- rownames(a)
+  n <- length(terms)
+  
+  # Check that all required columns exist and have length n
+  if (!all(c("F-value", "DF", "p-value") %in% colnames(a))) return(NULL)
+  if (length(a$`F-value`) != n || length(a$DF) < 2 || length(a$`p-value`) != n) return(NULL)
+  
+  random_effect <- tryCatch({
+    paste0("(", paste(names(model$modelStruct$reStruct), collapse = " + "), " | ", names(model$groups), ")")
+  }, error = function(e) NA)
+  
+  data.frame(
+    Response = rep(response_name, n),
+    Fixed_Effect = terms,
+    Random_Effect = rep(random_effect, n),
+    F_value = round(a$`F-value`, 2),
+    df1 = a$DF[1:n],
+    df2 = a$DF[(n + 1):(2 * n)],
+    P_value = format.pval(a$`p-value`, digits = 3, eps = 0.001),
+    stringsAsFactors = FALSE
+  )
+}
+
+response_map <- list(
+  m1 = "A_net", m2 = "A_net", m3 = "A_net",
+  m4 = "R_p",   m5 = "R_p",   m6 = "R_p",
+  m7 = "R_p",   m8 = "R_p",
+  m9 = "Phi",   m10 = "Phi",  m11 = "Phi"
+)
+
+table_s5 <- do.call(rbind, lapply(names(models), function(mname) {
+  extract_model_info(models[[mname]], response_map[[mname]])
+}))
+
+table_s5 <- table_s5 %>%
+  dplyr::mutate(
+    df = paste0(df1, ", ", df2),
+    P_value = ifelse(P_value == "<0.001", "<0.001", P_value)
+  ) %>%
+  dplyr::select(Response, Fixed_Effect, Random_Effect, F_value, df, P_value)
 
 
-adf <- read.csv("~/Documents/GitHub/Photorespiration-temperate-species/output/species-output-annotated.csv",
-                comment.char = "#" )
+adf <- read.csv("Species-output-with-sla.csv",
+                comment.char = "#", stringsAsFactors = T)
 
 adf$tlf <- as.factor(adf$tleaf)
 
@@ -56,9 +140,9 @@ adf$tlf <- as.factor(adf$tleaf)
 # adf <- subset(adf, pr.percent <=1.1)
 ###
 
-  geom_point(size = 3, stroke = 0.85, aes(color = tleaf, shape = sp)) +
     
 ggplot(adf, aes(y = pr.percent, x=tlf)) +
+  geom_point(size = 3, stroke = 0.85, aes(color = tleaf, shape = sp)) +
   scale_y_continuous(limits = c(0, 1.75), 
                      name = expression(pr)) +
   geom_boxplot(aes()) +
@@ -103,34 +187,38 @@ ggplot(adf, aes(y = pr.percent, x = tleaf)) +
 
 
 
-adf <- subset(adf,  sp != "Scandosorbus intermedia")
+# adf <- subset(adf,  sp != "Scandosorbus intermedia")
 
 
 adf$sp <- factor(adf$sp, levels = c("Betula pendula", 
-                                  "Fagus sylvatica","Betula pubescens", "Acer platanoides", "Tilia cordata", "Corylus avellana"))
+                                  "Fagus sylvatica","Betula pubescens", "Acer platanoides", "Tilia cordata", "Corylus avellana", "Scandosorbus intermedia"))
 
-p3 <- ggplot(adf, aes(y = pr.percent, x = tleaf)) +
-  scale_y_continuous(limits = c(0, 1.75), 
-                     name = expression(phi == R[p] / A[net])) +
-  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
-  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
-  scale_x_continuous(limits = c(20, 40), 
-                     name = expression(pr)) +
-  ggthemes::theme_base() +
-  geom_smooth(aes(group = 1), 
-              method = "lm", 
-              se = T, 
-              color = "grey20") + 
-  theme(axis.text.y = element_text(size = 15),
-        axis.text.x = element_text(size = 15),
-        panel.border = element_rect(color = "grey70")) +
-  facet_wrap(~sp, nrow = 1); p3
+adf <- adf %>%
+  mutate(tleaf_f = as.factor(tleaf))  
 
 
+cld_list <- adf %>%
+  group_by(sp) %>%
+  group_map(~{
+    model <- aov(anet.21p ~ tleaf_f, data = .x)
+    tukey <- TukeyHSD(model)
+    ltr   <- multcompLetters4(model, tukey)
+    
+    letters_vec <- ltr$tleaf_f$Letters
+    df_letters <- data.frame(
+      tleaf_f = names(letters_vec),
+      Letters = letters_vec,
+      stringsAsFactors = FALSE
+    )
+    
+    df_letters <- df_letters %>%
+      left_join(.x %>% group_by(tleaf_f) %>% summarise(mean_anet = mean(anet.21p)), by = "tleaf_f") %>%
+      mutate(sp = dplyr::cur_group()$sp)   # ✅ use cur_group() instead of unique(.x$sp)
+  })
 
-  
-  
-  
+cld_df <- do.call(rbind, cld_list)
+
+
 
 p1 <- ggplot(adf, aes(y = anet.21p, x = tleaf)) +
   scale_y_continuous(limits = c(0, 25), 
@@ -149,24 +237,46 @@ p1 <- ggplot(adf, aes(y = anet.21p, x = tleaf)) +
         panel.border = element_rect(color = "grey70")) +
   facet_wrap(~sp, nrow = 1); p1
 
+# 
+# p1b <- ggplot(adf, aes(y = anet.0p, x = tleaf)) +
+#   scale_y_continuous(limits = c(0, 30), 
+#                      name = expression(paste(A[net]*" ("~mu~mol~m^{-2}~s^{-1}~")"))) +
+#   geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+#   scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+#   scale_x_continuous(limits = c(20, 40), 
+#                      name = expression(paste(T[leaf]~"("~degree~"C)"))) +
+#   ggthemes::theme_base() +
+#   geom_smooth(aes(group = 1), 
+#               method = "lm", 
+#               se = T, 
+#               color = "grey20") + 
+#   theme(axis.text.y = element_text(size = 15),
+#         axis.text.x = element_text(size = 15),
+#         panel.border = element_rect(color = "grey70")) +
+#   facet_wrap(~sp, nrow = 1); p1b
 
-p1b <- ggplot(adf, aes(y = anet.0p, x = tleaf)) +
-  scale_y_continuous(limits = c(0, 30), 
-                     name = expression(paste(A[net]*" ("~mu~mol~m^{-2}~s^{-1}~")"))) +
-  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
-  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
-  scale_x_continuous(limits = c(20, 40), 
-                     name = expression(paste(T[leaf]~"("~degree~"C)"))) +
-  ggthemes::theme_base() +
-  geom_smooth(aes(group = 1), 
-              method = "lm", 
-              se = T, 
-              color = "grey20") + 
-  theme(axis.text.y = element_text(size = 15),
-        axis.text.x = element_text(size = 15),
-        panel.border = element_rect(color = "grey70")) +
-  facet_wrap(~sp, nrow = 1); p1b
 
+
+cld_list <- adf %>%
+  group_by(sp) %>%
+  group_map(~{
+    model <- aov(pr.real ~ tleaf_f, data = .x)
+    tukey <- TukeyHSD(model)
+    ltr   <- multcompLetters4(model, tukey)
+    
+    letters_vec <- ltr$tleaf_f$Letters
+    df_letters <- data.frame(
+      tleaf_f = names(letters_vec),
+      Letters = letters_vec,
+      stringsAsFactors = FALSE
+    )
+    
+    df_letters <- df_letters %>%
+      left_join(.x %>% group_by(tleaf_f) %>% summarise(mean_anet = mean(anet.21p)), by = "tleaf_f") %>%
+      mutate(sp = dplyr::cur_group()$sp)   # ✅ use cur_group() instead of unique(.x$sp)
+  })
+
+cld_df <- do.call(rbind, cld_list)
 
 
 
@@ -189,6 +299,49 @@ p2 <- ggplot(adf, aes(y = pr, x = tleaf)) +
 
 
 ###
+
+
+
+cld_list <- adf %>%
+  group_by(sp) %>%
+  group_map(~{
+    model <- aov(pr.percent ~ tleaf_f, data = .x)
+    tukey <- TukeyHSD(model)
+    ltr   <- multcompLetters4(model, tukey)
+    
+    letters_vec <- ltr$tleaf_f$Letters
+    df_letters <- data.frame(
+      tleaf_f = names(letters_vec),
+      Letters = letters_vec,
+      stringsAsFactors = FALSE
+    )
+    
+    df_letters <- df_letters %>%
+      left_join(.x %>% group_by(tleaf_f) %>% summarise(mean_anet = mean(anet.21p)), by = "tleaf_f") %>%
+      mutate(sp = dplyr::cur_group()$sp)   # ✅ use cur_group() instead of unique(.x$sp)
+  })
+
+cld_df <- do.call(rbind, cld_list)
+
+
+
+p3 <- ggplot(adf, aes(y = pr.percent, x = tleaf)) +
+  scale_y_continuous(limits = c(0, 1.75), 
+                     name = expression(phi == R[p] / A[net])) +
+  geom_boxplot(aes(group = cut_width(tleaf, 1))) + # Grouping for boxplot
+  scale_shape_manual(values = c(21,22,23,24,25,1,2)) +
+  scale_x_continuous(limits = c(20, 40), 
+                     name = expression(pr)) +
+  ggthemes::theme_base() +
+  geom_smooth(aes(group = 1), 
+              method = "lm", 
+              se = T, 
+              color = "grey20") + 
+  theme(axis.text.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15),
+        panel.border = element_rect(color = "grey70")) +
+  facet_wrap(~sp, nrow = 1); p3
+
 
 
 

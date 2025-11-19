@@ -7,7 +7,7 @@ library(dplyr)
 
 
 
-
+### Box 1 Figure
 
 df <- read.csv("Data/Literature data/Compiled-literature-ALL-DATA.csv", header = T, stringsAsFactors = T, sep = ",")
 
@@ -17,7 +17,35 @@ df <- subset(df,tl2==1)
 df$cat <- factor(df$cat, levels = c("Short",  "Tree", "Current 25", "Current 30", "Current 35"))
 
 # 21 Sept 2025 box figure
-svg("PR-lit.svg", width = 8, height = 5)
+
+df$cat <- gsub("-", "_", df$cat)
+df$cat <- as.factor(df$cat)
+
+# ANOVA
+model <- aov(phi ~ cat, data = df)
+
+# Tukey post-hoc
+tuk <- TukeyHSD(model)
+
+# Compact letter display
+ltr <- multcompLetters4(model, tuk)
+
+# Extract named vector of letters
+letters_vec <- ltr$cat$Letters
+
+# Convert to tidy data frame
+cld <- data.frame(
+  cat     = names(letters_vec),
+  Letters = letters_vec,
+  stringsAsFactors = FALSE
+)
+
+# Add group means for positioning
+cld <- cld %>%
+  dplyr::left_join(df %>% dplyr::group_by(cat) %>% dplyr::summarise(mean_phi = mean(phi)), by = "cat")
+
+
+svg("Box1.svg", width = 8, height = 5)
 
 ggplot(df, aes(x = cat, y = phi, fill = cat)) + 
   geom_boxplot(
@@ -47,7 +75,10 @@ scale_color_manual(values = c("red","blue", "red", "red","darkgreen","red","red"
   theme(
     legend.text = element_text(family = "Times New Roman", face = "italic"),
     legend.title = element_text(family = "Times New Roman", face = "italic")
-  ) + coord_flip()
+  ) + 
+  geom_text(data = cld, aes(x = cat, y = mean_phi + 0.3, label = Letters),
+            inherit.aes = FALSE, vjust = 0) + 
+  coord_flip()
 
 dev.off()
 
@@ -77,7 +108,8 @@ print(phi_summary)
 setwd("C:/Users/Phili/Desktop/Github/Photorespiration-temperate-species/Data/Literature data/Final Literature values")
 
 ###Species
-df <- read.csv("species-output2.csv", header = T, stringsAsFactors = T, sep = ";")
+
+df <- read.csv("Species-output-with-sla.csv", header = T, stringsAsFactors = T, sep = ";")
 
 ###Ecotypes
 df <- read.csv("ecotypes-output.csv", header = T, stringsAsFactors = T, sep = ";")
