@@ -13,8 +13,8 @@ library(purrr)
 
 
 # Species #######################
-df <- read.csv("Data/Photorespiration temperate/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
-
+setwd("~/Documents/GitHub/Photorespiration-temperate-species/output2026")
+df <- read.csv("~/Documents/GitHub/Photorespiration-temperate-species/Data/Photorespiration temperate/Uppsala-2024-Summer-Photorespiration-SpotMes-TreeSpp.csv", header = T, stringsAsFactors = T, sep = ";")
 
 ###### Photorespiration rate calculation loop -----------------------------------------------------
 
@@ -29,176 +29,139 @@ dflist          <- split(df,unique(list(df$pairid)))
 dflist          <- dflist[sapply(dflist, nrow)>0] 
 
 setwd("output")
-# tweak the code below for photorespiration rate calculation. 
+
 correct_RD <- function(data, output_path){
-  ColumnNames <- c("sp","treeid","tleaf",
-             "anet.21p",    
-             "anet.0p",
-             "anet.delta",
-             "pr.CO2", 
-             "pr.real",
-             "pr.percent",    
-             "gsw.21p",    
-             "gsw.0p",     
-             "gsw.delta",  
-             "gsw.percent", 
-             "E.21p",     
-             "E.0p",      
-             "E.delta",   
-             "E.percent", 
-             "ETR.21p",     
-             "ETR.0p",
-             "ETR.delta",   
-             "ETR.percent",
-             "JT",
-             "JO1",
-             "JC1",
-             "JO2",
-             "JC2",
-             "Rp.ETR",
-             "JO1.percent",
-             "JC1.percent",
-             "Rp.ETR.percent",
-             "JC2.percent",
-             "NPQ.21p",
-             "NPQ.0p",
-             "NPQ.delta",
-             "NPQ.percent")
+  ColumnNames <- c("sp","treeid","Tleaf",
+                   "anet.21p",    
+                   "anet.0p",
+                   "Rp.M1",
+                   "phi.M1",
+                   "gsw.21p",    
+                   "gsw.0p",     
+                   "gsw.delta",  
+                   "gsw.percent", 
+                   "E.21p",     
+                   "E.0p",      
+                   "E.delta",   
+                   "E.percent", 
+                   "ETR.21p",     
+                   "ETR.0p",
+                   "ETR.delta",   
+                   "ETR.percent",
+                   "JT",
+                   "Rp.ETR",
+                   "phi.ETR")
   
   output_data <- data.frame(matrix(nrow = 0, ncol = length(ColumnNames)))
   names(output_data) <- ColumnNames
-
+  
+  get1 <- function(x) ifelse(length(x) == 0, NA, x[1])
+  
   for(dataIdx in 1:length(data)){
     
     speciesdata <- data[[dataIdx]]
+    
     if(nrow(speciesdata) != 2){
-      print(names(dflist)[dataIdx])
+      print(names(data)[dataIdx])
       print(nrow(speciesdata))
       next
     }
     
-    sp               <-     speciesdata$sp[1]
-    treeid           <-     speciesdata$treeid[1]
-    tleaf         <-     speciesdata$tleaf[1]
-    p21              <-     subset(speciesdata, olev == "21p")    
-    p0               <-     subset(speciesdata, olev == "0p")
-    anet.21p         <-     p21$A
-    anet.0p          <-     p0$A
-     
-
-    # Correcting for dark respiration - NOT DONE
-    # Since we assume mitochondrial respiration under ambient and non-photorespiratory conditions are assumed constant - we will not correct for Rd. hence, this part of the code is ignored. 
-    # In case used: The values for slope and intercept calculated using literature values. 
-    #Rd               <-      0.05554*anet.21p+ 0.11395 
-    #corranet         <-      anet.21p-Rd          
-    # "corranet" is Anet corrected for Rd
+    p21 <- subset(speciesdata, olev == "21p")
+    p0  <- subset(speciesdata, olev == "0p")
     
-    anet.delta       <-      anet.0p - anet.21p
-    ## uses Walker 2017 temperature function for lambda
-    ## lambda = 0.389 + 0.00876 x Tleaf 
-    ## to use default lambda: pr.CO2 <- anet.delta * 0.5
-  
-    pr.CO2           <-      anet.delta * (0.38926+(0.008765*tleaf))
-    pr.real          <-      anet.delta + pr.CO2
-    pr.percent       <-      pr.real/anet.21p
+    if(nrow(p21) != 1 | nrow(p0) != 1){
+      print(paste("Skipping pair", names(data)[dataIdx],
+                  "because 21p rows =", nrow(p21),
+                  "and 0p rows =", nrow(p0)))
+      next
+    }
     
-    gsw.21p          <-      p21$gsw
-    gsw.0p           <-      p0$gsw
-    gsw.delta        <-      p0$gsw - p21$gsw
-    gsw.percent      <-      gsw.delta/p21$gsw
+    # use the factor column directly, then convert to character
+    sp     <- as.character(speciesdata$sp[1])
+    treeid <- as.character(speciesdata$treeid[1])
+    Tleaf  <- get1(speciesdata$Tleaf)
     
-    E.21p            <-      p21$E
-    E.0p             <-      p0$E
-    E.delta          <-      p0$E - p21$E
-    E.percent        <-      E.delta/p21$E
+    anet.21p <- get1(p21$A)
+    anet.0p  <- get1(p0$A)
     
+    Rp.M1  <- anet.0p - anet.21p
+    phi.M1 <- Rp.M1 / anet.21p
     
-    ETR.21p          <-      p21$ETR
-    ETR.0p           <-      p0$ETR
-    ETR.delta        <-      p0$ETR - p21$ETR
-    ETR.percent      <-      ETR.delta/p21$ETR
-    JT               <-      ETR.21p + ETR.0p
-    JO1              <-      pr.percent * JT
-    JC1              <-      JT-JO1
-    JO2              <-      ((2/3)*(JT-4*(anet.21p)))
-    JC2              <-      ((1/3)*(JT+8*(anet.21p)))
-    Rp.ETR           <-      ((1/12)*(JT-4*(anet.21p)))
-    JO1.percent      <-      JO1/JT
-    JC1.percent      <-      JC1/JT
-    Rp.ETR.percent   <-      Rp.ETR/JT
-    JC2.percent      <-      JC2/JT
+    gsw.21p     <- get1(p21$gsw)
+    gsw.0p      <- get1(p0$gsw)
+    gsw.delta   <- gsw.0p - gsw.21p
+    gsw.percent <- gsw.delta / gsw.21p
     
-    NPQ.21p          <-      p21$NPQ
-    NPQ.0p           <-      p0$NPQ
-    NPQ.delta        <-      NPQ.0p - NPQ.21p
-    NPQ.percent      <-      NPQ.delta/NPQ.21p
+    E.21p     <- get1(p21$E)
+    E.0p      <- get1(p0$E)
+    E.delta   <- E.0p - E.21p
+    E.percent <- E.delta / E.21p
     
-    new_data = data.frame(as.character(sp),
-                          as.character(treeid),
-                          as.character(tleaf), 
-                          anet.21p,    
-                          anet.0p,     
-                          anet.delta,
-                          pr.CO2,
-                          pr.real,
-                          pr.percent,
-                          gsw.21p,    
-                          gsw.0p,     
-                          gsw.delta,  
-                          gsw.percent,
-                          E.21p,     
-                          E.0p,      
-                          E.delta,   
-                          E.percent, 
-                          ETR.21p,     
-                          ETR.0p,   
-                          ETR.delta,   
-                          ETR.percent,
-                          JT,
-                          JO1,
-                          JC1,
-                          JO2,
-                          Rp.ETR,
-                          JC2,
-                          JO1.percent,
-                          JC1.percent,
-                          Rp.ETR.percent,
-                          JC2.percent,
-                          NPQ.21p,
-                          NPQ.0p,
-                          NPQ.delta, 
-                          NPQ.percent)
+    ETR.21p     <- get1(p21$ETR)
+    ETR.0p      <- get1(p0$ETR)
+    ETR.delta   <- ETR.0p - ETR.21p
+    ETR.percent <- ETR.delta / ETR.21p
+    
+    JT         <- ETR.21p + ETR.0p
+    
+    Rd_assumed <- 1.0
+    Rp.ETR     <- (JT - 4 * (anet.21p + Rd_assumed)) / 12
+    phi.ETR    <- Rp.ETR / anet.21p
+    
+    new_data <- data.frame(
+      sp         = sp,
+      treeid     = treeid,
+      Tleaf      = Tleaf,
+      anet.21p   = anet.21p,
+      anet.0p    = anet.0p,
+      Rp.M1      = Rp.M1,
+      phi.M1     = phi.M1,
+      gsw.21p    = gsw.21p,
+      gsw.0p     = gsw.0p,
+      gsw.delta  = gsw.delta,
+      gsw.percent= gsw.percent,
+      E.21p      = E.21p,
+      E.0p       = E.0p,
+      E.delta    = E.delta,
+      E.percent  = E.percent,
+      ETR.21p    = ETR.21p,
+      ETR.0p     = ETR.0p,
+      ETR.delta  = ETR.delta,
+      ETR.percent= ETR.percent,
+      JT         = JT,
+      Rp.ETR     = Rp.ETR,
+      phi.ETR    = phi.ETR
+    )
     
     names(new_data) <- names(output_data)
     output_data <- rbind(output_data, new_data)
-    
-    
   }
   
-  file_path = paste(output_path, "Species-output.csv", sep = "/")
+  file_path <- paste(output_path, "Species-output.csv", sep = "/")
   if(!dir.exists(output_path)){
-    dir.create(output_path, recursive = T)
+    dir.create(output_path, recursive = TRUE)
   }
-  
   
   index <- 1
   while(file.exists(file_path)){
-    file_path <- paste(output_path, paste("Species-output", as.character(index), ".csv", sep =""), sep = "/")
-    index = index + 1
+    file_path <- paste(output_path,
+                       paste0("Species-output", index, ".csv"),
+                       sep = "/")
+    index <- index + 1
   }
- 
   
-
   write.table(output_data, file = file_path, 
-              row.names = FALSE, col.names = T, sep = ";")
+              row.names = FALSE, col.names = TRUE, sep = ",")
 }
+
 correct_RD(dflist, "./")
 
 
 ####### plotting output -------
-setwd("output")
 
-outs <- read.csv("Species-output-with-sla.csv", stringsAsFactors = T, sep = ",")
+
+outs <- read.csv("Species-output3.csv", stringsAsFactors = T, sep = ",")
 # SLA data from GIFT database 
 # Denelle, Pierre, Patrick Weigelt, and Holger Kreft. 2023. “GIFT—An R Package to Access the Global Inventory of Floras and Traits.” Methods in Ecology and Evolution 14 (11): 2738–48.
 # Weigelt, Patrick, Christian König, and Holger Kreft. 2020. “GIFT – A Global Inventory of Floras and Traits for Macroecology and Biogeography.” Journal of Biogeography 47 (1): 16–43.
@@ -459,8 +422,12 @@ anova(mod_main_effects, mod_interaction)
 
 ## Main Figure 1 ---------------------------------
 
+
+come back here
+
 ## plots updateds to add anova p value for each panel
 
+# next one works - this does not. 
 outs$tleaf <- as.numeric(outs$tleaf)
 pval_df <- outs %>%
   group_by(sp) %>%
@@ -471,6 +438,31 @@ pval_df <- outs %>%
     }, error = function(e) NA)
   ) %>%
   mutate(label = paste0("P = ", signif(pval, 3)))
+
+outs %>%
+  group_by(sp) %>%
+  summarise(test = 1)
+
+
+
+
+pval_df <- outs %>%
+  group_by(sp) %>%
+  filter(n_distinct(tleaf) >= 2) %>%
+  summarise(
+    pval = tryCatch({
+      sm <- summary(aov(anet.21p ~ factor(tleaf)))
+      # Only extract p-value if column exists
+      if ("Pr(>F)" %in% colnames(sm[[1]])) {
+        sm[[1]][["Pr(>F)"]][1]
+      } else {
+        NA_real_
+      }
+    }, error = function(e) NA_real_),
+    .groups = "drop"
+  ) %>%
+  mutate(label = ifelse(is.na(pval), "P = NA", paste0("P = ", signif(pval, 3))))
+
 
 annot_df <- outs %>%
   group_by(sp) %>%
@@ -497,6 +489,11 @@ plot1 <- ggplot(outs, aes(x = tleaf, y = anet.21p)) +
     strip.text = element_blank()
   ) +
   geom_text(data = annot_df, aes(x = 30, y = 24, label = label), inherit.aes = FALSE, size = 5);  plot1
+
+
+
+
+
 
 
 pval_df <- outs %>%

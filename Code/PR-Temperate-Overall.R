@@ -478,7 +478,7 @@ p7 <- ggplot(adf, aes(y = gsw.0p, x = tleaf)) +
 
 
 
-ggplot(adf, aes(y = ETR.delta, x=pr.percent, color = sp)) +
+ggplot(adf, aes(y = -ETR.delta, x=pr.percent, color = sp)) +
     geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
     scale_x_continuous(limits = c(0, 1.2), 
                        name = expression(pr.percent)) + 
@@ -491,9 +491,9 @@ ggplot(adf, aes(y = ETR.delta, x=pr.percent, color = sp)) +
     facet_wrap(~tleaf)
 
 
-ggplot(adf, aes(y = ETR.delta, x=pr, color = sp)) +
+ggplot(adf, aes(y = ETR.delta, x=pr.percent, color = sp)) +
     geom_point(size = 3, stroke = 0.85, aes(color = sp, shape = sp)) +
-    scale_x_continuous(limits = c(-1, 15), 
+    scale_x_continuous(limits = c(-1, 2.5), 
                        name = expression(pr)) + 
     ggthemes::theme_base() +
     geom_smooth(se = T, method="lm", col = "grey80") +
